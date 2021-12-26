@@ -6,22 +6,21 @@ echo('<nav class="w3-sidebar w3-bar-block w3-black w3-collapse w3-top" style="z-
             <h3 class="w3-wide"><b>BIMB</b></h3>
     </div>
     <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">');
-    if ($st==0){echo('<a href="../purchase/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-sticky-note-o w3-margin-right"></i>Purchase</a>');} 
-        else {echo('<a href="../purchase/index.php" class="w3-bar-item w3-button"><i class="fa fa-sticky-note-o w3-margin-right"></i>Purchase</a>');}
+    if ($st==0){echo('<a href="../purchase/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-shopping-cart w3-margin-right"></i>Purchase</a>');} 
+        else {echo('<a href="../purchase/index.php" class="w3-bar-item w3-button"><i class="fa fa-shopping-cart w3-margin-right"></i>Purchase</a>');}
     if ($st==1){echo('<a href="../sales/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-id-card w3-margin-right"></i>Sales</a>');} 
         else {echo('<a href="../sales/index.php" class="w3-bar-item w3-button"><i class="fa fa-id-card w3-margin-right"></i>Sales</a>');}
-    if ($st==2){echo('<a href="../supplier/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-key w3-margin-right"></i>Suppliers</a>');} 
-        else {echo('<a href="../supplier/index.php" class="w3-bar-item w3-button"><i class="fa fa-key w3-margin-right"></i>Suppliers</a>');}
+    if ($st==2){echo('<a href="../supplier/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-truck w3-margin-right"></i>Suppliers</a>');} 
+        else {echo('<a href="../supplier/index.php" class="w3-bar-item w3-button"><i class="fa fa-truck w3-margin-right"></i>Suppliers</a>');}
     if ($st==3){echo('<a href="../products/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-address-book w3-margin-right"></i>Products</a>');} 
         else {echo('<a href="../products/index.php" class="w3-bar-item w3-button"><i class="fa fa-address-book w3-margin-right"></i>Products</a>');}
     if ($st==4){echo('<a href="../payment/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-id-card w3-margin-right"></i>Payments</a>');} 
         else {echo('<a href="../payment/index.php" class="w3-bar-item w3-button"><i class="fa fa-id-card w3-margin-right"></i>Payments</a>');}
-    if ($st==5){echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-id-card w3-margin-right"></i>GST reports</a>');} 
-        else {echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button"><i class="fa fa-id-card w3-margin-right"></i>GST reports</a>');}
-    echo('<a href="./logout.php" class="w3-bar-item w3-button w3-black"></i>Logout</a>
+    if ($st==5){echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-pie-chart w3-margin-right"></i>GST reports</a>');} 
+        else {echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button"><i class="fa fa-pie-chart w3-margin-right"></i>GST reports</a>');}
+    echo('<a href="./logout.php" class="w3-bar-item w3-button"><i class="fa fa-arrow-left w3-margin-right"></i>Logout</a>
     </div>
-    <a href="#footer"  onclick=confi(); class="w3-bar-item w3-button w3-padding">Security Checkup</a>
-    <a href="contact.php" class="w3-bar-item w3-button w3-padding">Contact Us</a>
+    <a href="../Contact/index.php" class="w3-bar-item w3-button w3-padding">Contact Us</a>
 </nav>');
 }
 

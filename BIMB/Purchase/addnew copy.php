@@ -4,22 +4,31 @@
     require_once "..//util/header.php";
 ?>
         <title>Add New Purchase</title>
+        <style>
+        .ui-autocomplete {
+            max-height: 200px;
+            overflow-y: auto;
+            /* prevent horizontal scrollbar */
+            overflow-x: hidden;
+  }
+  </style>
     </head>
     <body class="w3-content" style="max-width:1350px">
         <?php mainbody(0,"Add New Purchase") ?>
         <!-- items grid -->
 
+        <br>
         <div class="w3-row w3-margin">
             <div class="w3-card-4">
                 <div class="w3-container">
                     <form name='addnew' method="get">
                     <div class="w3-row">
                         <div class="w3-col m5 w3-padding ">
-                            <label for="supp_name">Supplier name:</label>
-                            <input id="supp_name" class="w3-input" type="text" name="supp_name" size="30" tabindex="1" required/>
+                            <label for="s_name">Supplier name:</label>
+                            <input id="s_name" class="w3-input" type="text" name="s_name" size="30" tabindex="1" required/>
                         </div><div class="w3-col m5 w3-padding ">
-                            <label for="pur_date">Date.:</label>
-                            <input class="w3-input" type="date" name="pur_date" size="30" required tabindex="2"/>
+                            <label for="p_date">Date.:</label>
+                            <input class="w3-input" type="date" name="p_date" size="30" required tabindex="2"/>
                         </div>
                         <div class="w3-col m5 w3-padding ">
                             <label for="p_bill_no">Bill No.:</label>
@@ -39,7 +48,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="w3-row"><br>
+                    <div class="w3-row">
                         <div class="w3-card-4">
                             <div class="w3-container">
                                 <div class="w3-col m2 w3-padding ">
@@ -48,11 +57,8 @@
                                 <div class="w3-col m4 w3-padding ">
                                     <input id="prd_name" class="w3-input" type="text" name="" size="6" placeholder="enter product name" tabindex="8"/>
                                 </div>
-                                <div class="w3-col m2 w3-padding ">
-                                    <input id="prd_qnt" class="w3-input" type="text" name="" size="6" placeholder="enter quantity" tabindex="9"/>
-                                </div>
-                                <div class="w3-col m2 w3-padding ">
-                                    <input id="prd_id" class="w3-input" type="text" name="" size="6" placeholder="product id" tabindex="10" disabled/>
+                                <div class="w3-col m3 w3-padding ">
+                                    <input id="prd_qnt" class="w3-input" type="text" name="" size="6" placeholder="enter product quantity" tabindex="9"/>
                                 </div>
                                 <div class="w3-col m2 w3-padding ">
                                     <button id="addproduct" class="w3-button w3-dark-grey" name="addproduct" value="1" >Add</button>
@@ -62,25 +68,11 @@
                         </div><br>
                         <div class="w3-row">
                             <div class="w3-card-4">
-                                <table class="w3-table-all w3-small ">
-                                    <thead>
-                                        <tr>
-                                            <th>Sr No.</th>
-                                            <th>Product Name</th>
-                                            <th>Product ID</th>
-                                            <th>Product Quantity</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="additemdiv" >
-                                    </tbody>
-                                    <tfoot>
-                                        <input name="items" id="items" class="w3-hide" value="">
-                                    </tfoot>
-                                </table>
+                                <div id="additemdiv" class="w3-container">
+                                </div>
                             </div>
                         </div><br>
-                        <!--div class="w3-row">
+                        <div class="w3-row">
                             <div class="w3-card-4">
                                 <div id="" class="w3-container">
                                     <div class="w3-col m2 w3-padding ">
@@ -94,23 +86,21 @@
                                     </div>
                                 </div>
                             </div>
-                        </div--><br>                    
+                        </div><br>                    
                         <button class="w3-button w3-block w3-dark-grey" type="submit" name="add" value="1" >ADD NEW </button>
                     </form>
                 </div>
             </div>
         </div><br>
-        
 
         <!-- END items grid -->
         <?php
             require_once "..//util/footer.php";
         ?>
 
-        <script>
+<script>
         $(document).ready(function () {
             window.console && console.log('Document ready called');
-            
             $('form input').keydown(function (e) {
                 if (e.keyCode == 13) {
                     var inputs = $(this).parents("form").eq(0).find(":input");
@@ -119,33 +109,24 @@
                 }
             });
 
-            $('#supp_name').autocomplete({
-                    source: "../GET/supplierget.php",
+            $('#s_name').autocomplete({
+                    source: "../util/supplierget.php",
                     minLength: 1,
-            });
+                });
       
             $('#paymode').autocomplete({
-                source: "../GET/paymodeget.php",
+                source: "../util/paymodeget.php",
                 minLength: 1,
             });
       
             $('#prd_name').autocomplete({
-                source: "../GET/productget.php",
+                source: "../util/productget.php",
                 minLength: 1,
-            });
-            
-            $('#prd_name').change(function(){
-                var itemname =$("#prd_name").val();
-                $.getJSON("../GET/prdidget.php?term="+itemname, function( data ) {
-                    $.each( data, function( key, val ) {
-                        $('#prd_id').val(val);
-                    });
-                });
             });
 
             $('#p_bill_no').change(function(){
                 var billno = $('#p_bill_no').val();
-                $.getJSON("../GET/billget.php?term="+billno, function( data ) {
+                $.getJSON("../util/billget.php?term="+billno, function( data ) {
                     $.each( data, function( key, val ) {
                         if (val===billno){
                             $('#bill_in_db').removeClass('w3-hide')
@@ -242,34 +223,25 @@
             });
 
             var countitem = 0;
-            var tabindex = 10;
-            var itemarray=[];
+            var tabindex = 9;
             $("#addproduct").click(function(){
                 event.preventDefault();
                 var itemname =$("#prd_name").val();
                 var itemqnt =$("#prd_qnt").val();
-                var productid=$("#prd_id").val();
-                if (itemname=="" || itemqnt=="" || productid==''){
+                if (itemname=="" & itemqnt==""){
 
                 } else{
-                    countitem++;
-                    tabindex++;
-                    var temparray=[];
-                    temparray[0]=productid;
-                    temparray[1]=itemqnt;
-                    itemarray[countitem-1]=temparray;
-                    console.log(itemarray);
-                    $("#items").val(itemarray);
-                    $("#additemdiv").append('<tr><td>'+countitem+'</td><td>'+itemname+'</td><td>'+productid+'</td><td><input id="Qnt'+countitem+'" class="w3-input" type="text" tabindex="'+(parseInt(tabindex)+1) +'" size="6" placeholder="enter Quantity" value="'+itemqnt+'" /></td><td><button class="w3-button w3-block w3-dark-grey" onclick="delproduct('+countitem+')">-Delete-</button></td></tr>');
-                    tabindex++;
-                    $("#prd_name").focus();
+                countitem++;
+                tabindex++;
+                $("#additemdiv").append('<div class="w3-col m3 w3-padding"><div class="w3-card-4">' +
+                    '<input id="prd'+countitem+'" class="w3-input" type="text" name="prdname'+countitem+'" size="6" tabindex="'+tabindex+'" placeholder="enter product name" value="'+itemname+'" />'+
+                    '<input id="Qnt'+countitem+'" class="w3-input" type="text" name="qnt'+countitem+'" tabindex="'+(parseInt(tabindex)+1) +'" size="6" placeholder="enter Quantity" value="'+itemqnt+'" />'+
+                '</div></div>');
+                tabindex++;
+                $("#prd_name").focus();
                 }
             });
         });
-        function delproduct(id){
-            event.preventDefault();
-                console.log('delete'+id)
-            };
         </script>
 
     </body>

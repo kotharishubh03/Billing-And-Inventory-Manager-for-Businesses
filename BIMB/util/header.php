@@ -4,7 +4,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!--link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"-->
         <link rel="stylesheet" type="text/css" href="../util/w3.css">
+        <link rel="stylesheet" type="text/css" href="../util/mycss.css">
         <link rel="stylesheet" type="text/css" href="../util/jquery-ui-1.12.1/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="../util/DataTables/datatables.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
