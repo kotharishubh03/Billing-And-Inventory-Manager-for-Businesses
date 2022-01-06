@@ -70,21 +70,43 @@ class bill {
     }
 }
 
-$DbClassObj= new Dbclass();
-$pdo=$DbClassObj->connect();
+class Product{
+    public $prd_id = "";
+    public $pdo="";
+
+    function __construct($pdo,$prd_id) {
+        $this->prd_id = $prd_id;
+        $this->pdo = $pdo;
+        $this->getinfo();
+    }
+    function getinfo(){
+        //SELECT `products`.`prd_id`, `prd_name` ,`suppliers`.`supp_name` FROM `products` left join `products_supplier` on `products`.`prd_id`= `products_supplier`.`prd_id` left join `suppliers` on `suppliers`.`supp_id`=`products_supplier`.`supp_id` ORDER BY `suppliers`.`supp_name` ASC,prd_name Asc
+        $stmt = $this->pdo->prepare('SELECT `prd_name` ,`suppliers`.`supp_name`,`suppliers`.`supp_id` FROM `products` left join `products_supplier` on `products`.`prd_id`= `products_supplier`.`prd_id` left join `suppliers` on `suppliers`.`supp_id`=`products_supplier`.`supp_id` Where `products`.`prd_id`=:prd_id');
+        $stmt->execute(array(':prd_id' => $this->prd_id));
+        $this->suppliers = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $stmt = $this->pdo->prepare('SELECT `prd_name` ,`suppliers`.`supp_name`,`suppliers`.`supp_id` FROM `products` left join `products_supplier` on `products`.`prd_id`= `products_supplier`.`prd_id` left join `suppliers` on `suppliers`.`supp_id`=`products_supplier`.`supp_id` Where `products`.`prd_id`=:prd_id');
+        $stmt->execute(array(':prd_id' => $this->prd_id));
+        $this->suppliers = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+    }
+}
+
+//$DbClassObj= new Dbclass();
+//$pdo=$DbClassObj->connect();
 
 //$a=new payment_mode($pdo);
-$atz=[];
-$stmt = $pdo->prepare("SELECT `pur_id` FROM `purchase` WHERE pur_date BETWEEN '2020-04-01' and '2021-03-31'");
-$stmt->execute(array());
-$rows = $stmt->fetchall();
+//$atz=[];
+//$stmt = $pdo->prepare("SELECT `pur_id` FROM `purchase` WHERE pur_date BETWEEN '2020-04-01' and '2021-03-31'");
+//$stmt->execute(array());
+//$rows = $stmt->fetchall();
 
-foreach($rows as $row){
-    $b1= new bill($pdo,$row['pur_id']);
-    array_push($atz,$b1);
-}
+//foreach($rows as $row){
+//    $b1= new bill($pdo,$row['pur_id']);
+//    array_push($atz,$b1);
+//}
 
-foreach($atz as $a){
-    echo($a->supp_name.' '.$a->pur_date.' '.$a->bill_no.'<br>');
-}
+//foreach($atz as $a){
+//    echo($a->supp_name.' '.$a->pur_date.' '.$a->bill_no.'<br>');
+//}
 ?>

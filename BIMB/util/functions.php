@@ -62,24 +62,41 @@ function mainbody($n,$name) {
 function flashMessage()
 {
     if (isset($_SESSION['error'])) {
-        echo('<p style="color: red;">' . htmlentities($_SESSION['error']) . "</p>\n");
+        echo('<div class="w3-panel w3-red"><h3>Error!</h3>
+            <p>' . htmlentities($_SESSION['error']) . '</p>
+        </div>');
         unset($_SESSION['error']);
     }
     if (isset($_SESSION['success'])) {
-        echo('<p style="color: green;">' . htmlentities($_SESSION['success']) . "</p>\n");
+        echo('<div class="w3-panel w3-green"><h3>Success!</h3>
+            <p>' . htmlentities($_SESSION['success']) . '</p>
+        </div>');
         unset($_SESSION['success']);
     }
 }
 
 
 function DateOptionADD($adz){
+    global $startdate;
+    global $enddate;
+    global $FY;
     if ($adz==0){
         $TodayYear = idate("Y");
         $TodayMonth = idate("m");
+        if($TodayMonth<4){
+            $startdate=($TodayYear-1).'-04-01';
+            $enddate=$TodayYear.'-03-31';
+        }
+        else{
+            $startdate=$TodayYear.'-04-01';
+            $enddate=($TodayYear-1).'-03-31';
+        }
     }
     else {
         $TodayYear = idate("Y",strtotime('01-04-'.$adz));
         $TodayMonth = idate("m",strtotime('01-04-'.$adz));
+            $startdate=$TodayYear.'-04-01';
+            $enddate=($TodayYear+1).'-03-31';
     }
     if ($TodayMonth<4){
         $TodayYear=$TodayYear-1;
@@ -88,11 +105,13 @@ function DateOptionADD($adz){
     for ($i=0;$i<6;$i++){
         if ($Year==$TodayYear){
             echo('<option value="./index.php?fy='.$Year.'" selected>'.$Year.'-'.($Year+1).'</option>');
+            $FY=$Year.'-'.($Year+1);
         }
         else{
             echo('<option value="./index.php?fy='.$Year.'">'.$Year.'-'.($Year+1).'</option>');
         }
         $Year=$Year+1;
     }
+
 }
 ?>

@@ -5,14 +5,19 @@
 
     session_start();
 
-    if(isset($_POST['add'])){
-        $stmt = $pdo->prepare('INSERT INTO `purchase`(`supp_id`, `pur_date`, `bill_no`, `total`, `tax5`, `gst5`, `tax12`, `gst12`, `tax18`, `gst18`, `tax28`, `gst28`)
-        VALUES ((SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name), :pur_date, :bill_no, :total, :tax5, :gst5, :tax12, :gst12, :tax18, :gst18, :tax28, :gst28)');
-        $stmt->execute(array(':supp_name'=>$_POST['supp_name'], ':pur_date'=>date("Y-m-d", strtotime($_POST['pur_date'])), ':bill_no'=>$_POST['p_bill_no'], ':total'=>$_POST['totaltotal'], 
+    if(isset($_POST['update'])){
+        $stmt = $pdo->prepare('DELETE FROM `purchase_product` WHERE pur_id=:pur_id');
+        $stmt->execute(array(':pur_id'=>$_POST['update']));
+        $stmt = $pdo->prepare('DELETE FROM `purchase` WHERE pur_id=:pur_id');
+        $stmt->execute(array(':pur_id'=>$_POST['update']));
+        $stmt = $pdo->prepare('INSERT INTO `purchase`(`pur_id`,`supp_id`, `pur_date`, `bill_no`, `total`, `tax5`, `gst5`, `tax12`, `gst12`, `tax18`, `gst18`, `tax28`, `gst28`)
+        VALUES (:pur_id,(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name), :pur_date, :bill_no, :total, :tax5, :gst5, :tax12, :gst12, :tax18, :gst18, :tax28, :gst28)');
+        $stmt->execute(array(':pur_id'=>$_POST['update'],':supp_name'=>$_POST['supp_name'], ':pur_date'=>date("Y-m-d", strtotime($_POST['pur_date'])), ':bill_no'=>$_POST['p_bill_no'], ':total'=>$_POST['totaltotal'], 
             ':tax5'=> $_POST['grossa'], ':gst5'=> $_POST['sgsta'], ':tax12'=> $_POST['grossb'], ':gst12'=> $_POST['sgstb'], ':tax18'=> $_POST['grossc'], ':gst18'=> $_POST['sgstc'], ':tax28'=> $_POST['grossd'], ':gst28'=> $_POST['sgstd']));
         $pur_id = $pdo->lastInsertId();
         
         $items=explode(',',$_POST['items']);
+        $items=array_slice($items,1);
         $i=1;
         $temp="";
         foreach ($items as $item) {
@@ -26,21 +31,43 @@
             }
             $i=$i+1;
         }
-        $_SESSION['success']="Successfully Saved ! Add Another Purchase";
-
-        header('Location: ./addnew.php');
+        $_SESSION['success']="Successfully Updated";
+        header('Location: ./about.php?pur_id='.$_POST['update']);
         exit;
     }
+    
+    $stmt = $pdo->prepare('SELECT `suppliers`.`supp_name`, `purchase`.`pur_date` as pdate, `purchase`.`bill_no`, `purchase`.`total`, `purchase`.`tax5`, `purchase`.`gst5`, `purchase`.`tax12`, `purchase`.`gst12`, 
+        `purchase`.`tax18`,`purchase`.`gst18`, `purchase`.`tax28`, `purchase`.`gst28` , `payment_mode`.`pay_mode` , `purchase`.`pay_date` FROM `purchase` join `suppliers` on `purchase`.`supp_id` = `suppliers`.`supp_id` left JOIN payment_mode 
+        on payment_mode.pay_mode_id=purchase.pay_mode_id WHERE `purchase`.`pur_id`=:pur_id Limit 1');
+    $stmt->execute(array(':pur_id'=>$_GET['pur_id']));
+    $row = $stmt->fetch();
 
+    
+    $stmt = $pdo->prepare('SELECT `prd_name`,pp.`prd_id`, `qnt`, `cost_price` FROM `purchase_product` as pp join `products` on pp.prd_id=products.prd_id WHERE `pur_id`=:pur_id');
+    $stmt->execute(array(':pur_id'=>$_GET['pur_id']));
+    $items = $stmt->fetchall();
+    $itemsvar="";
+    $countitem = 1;
+    $tabindex = 11;
+    $itemarray=[];
+    foreach($items as $item){
+        $temp=[];
+        $temp[0]=$item['prd_id'];
+        $temp[1]=$item['qnt'];
+        $itemsvar=$itemsvar.'<tr><td>'.$countitem.'</td><td>'.$item['prd_name'].'</td><td>'.$item['prd_id'].'</td><td><input id="Qnt'.$countitem.'" class="w3-input" type="text" tabindex="'.(($tabindex)+1) .'" size="6" placeholder="enter Quantity" value="'.$item['qnt'].'" /></tr>';
+        $countitem = $countitem+1;
+        $tabindex = $tabindex+1;
+        $itemarray[$countitem-1]=$temp;
+    }
 ?>
     
 <?php
     require_once "..//util/header.php";
 ?>
-        <title>Add New Purchase</title>
+        <title>Update Purchase</title>
     </head>
     <body class="w3-content" style="max-width:1350px">
-        <?php mainbody(0,"Add New Purchase");
+        <?php mainbody(0,"Update Purchase");
             flashMessage();
         ?>
         <!-- items grid -->
@@ -52,14 +79,14 @@
                     <div class="w3-row">
                         <div class="w3-col m5 w3-padding ">
                             <label for="supp_name">Supplier name:</label>
-                            <input id="supp_name" class="w3-input" type="text" name="supp_name" size="30" tabindex="1" required/>
+                            <input id="supp_name" class="w3-input" type="text" name="supp_name" size="30" tabindex="1" value="<?=$row['supp_name']?>" required/>
                         </div><div class="w3-col m5 w3-padding ">
                             <label for="pur_date">Date.:</label>
-                            <input class="w3-input" type="date" name="pur_date" size="30" required tabindex="2"/>
+                            <input class="w3-input" type="date" name="pur_date" size="30" value="<?=$row['pdate']?>" required tabindex="2"/>
                         </div>
                         <div class="w3-col m5 w3-padding ">
                             <label for="p_bill_no">Bill No.:</label>
-                            <input id="p_bill_no" class="w3-input" type="text" name="p_bill_no" size="30" required tabindex="3"/>
+                            <input id="p_bill_no" class="w3-input" type="text" name="p_bill_no" size="30" value="<?=$row['bill_no']?>" required tabindex="3"/>
                             <label id="bill_in_db" class="w3-red w3-hide">Already in database</label>
                         </div>
                     </div>
@@ -67,11 +94,11 @@
                         <div class="w3-responsive">
                             <table class="w3-table-all w3-small ">
                                 <tr><th></th><th>taxable</th><th>Round Off</th><th>Gross</th><th>SGST</th><th>CGST</th><th>Total</th></tr>
-                                <tr><td>2.5</td><td><input id="taxa" class="w3-input skcalculation" type="number" step="0.01" name="taxa" step="0.01" tabindex="4"size="6"/></td><td><input id="roundoffa" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="grossa" class="w3-input skcalculation1" type="number" name="grossa" step="0.01" size="6"/></td><td><input id="sgsta" class="w3-input skcalculation2" type="number" name="sgsta" step="0.01" size="6"/></td><td><input id="cgsta" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="totala" class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
-                                <tr><td>6</td><td><input id="taxb" class="w3-input skcalculation" type="number" name="taxb" step="0.01" step="0.01" tabindex="5"size="6"/></td><td><input id="roundoffb" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="grossb" class="w3-input skcalculation1" type="number" name="grossb" step="0.01" size="6"/></td><td><input id="sgstb" class="w3-input skcalculation2" type="number" name="sgstb" step="0.01" size="6"/></td><td><input id="cgstb" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="totalb"class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
-                                <tr><td>9</td><td><input id="taxc" class="w3-input skcalculation" type="number" name="taxc" step="0.01" step="0.01" tabindex="6"size="6"/></td><td><input id="roundoffc" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="grossc" class="w3-input skcalculation1" type="number" name="grossc" step="0.01" size="6"/></td><td><input id="sgstc" class="w3-input skcalculation2" type="number" name="sgstc" step="0.01" size="6"/></td><td><input id="cgstc" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="totalc"class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
-                                <tr><td>14</td><td><input id="taxd" class="w3-input skcalculation" type="number" name="taxd" step="0.01" step="0.01" tabindex="7"size="6"/></td><td><input id="roundoffd"class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="grossd" class="w3-input skcalculation1" type="number" name="grossd" step="0.01" size="6"/></td><td><input id="sgstd" class="w3-input skcalculation2" type="number" name="sgstd" step="0.01" size="6"/></td><td><input id="cgstd" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="totald" class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
-                                <tr><td>total</td><td><input id="taxtotal" class="w3-input skcalculation" type="number" step="0.01" name="taxtotal" step="0.01" size="6"/></td><td><input id="roundofftotal" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="grosstotal" class="w3-input skcalculation1" type="number" name="grosstotal" step="0.01" size="6"/></td><td><input id="sgsttotal" class="w3-input skcalculation2" type="number" name="sgsttotal" step="0.01" size="6"/></td><td><input id="cgsttotal" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="totaltotal"class="w3-input" type="number" name="totaltotal" step="0.01" size="6"/></td></tr>
+                                <tr><td>2.5</td><td><input id="taxa" class="w3-input skcalculation" type="number" step="0.01" name="taxa" value="<?=$row['tax5']?>"   step="0.01" tabindex="4"size="6"/></td><td><input id="roundoffa" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="grossa" class="w3-input skcalculation1" type="number" name="grossa" step="0.01" value="<?=$row['tax5']?>" size="6"/></td><td><input id="sgsta" class="w3-input skcalculation2" type="number" name="sgsta"  value="<?=$row['gst5']?>" step="0.01" size="6"/></td><td><input id="cgsta" class="w3-input" type="number" name=""  value="<?=$row['gst5']?>" step="0.01" size="6"/></td><td><input id="totala" class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
+                                <tr><td>6</td><td><input id="taxb" class="w3-input skcalculation" type="number" name="taxb" step="0.01"  value="<?=$row['tax12']?>" step="0.01" tabindex="5"size="6"/></td><td><input id="roundoffb" class="w3-input" type="number" name=""  step="0.01" size="6"/></td><td><input id="grossb" class="w3-input skcalculation1" type="number" name="grossb" step="0.01" value="<?=$row['tax12']?>" size="6"/></td><td><input id="sgstb" class="w3-input skcalculation2" type="number" name="sgstb" value="<?=$row['gst12']?>" step="0.01" size="6"/></td><td><input id="cgstb" class="w3-input" type="number" name="" value="<?=$row['gst12']?>" step="0.01" size="6"/></td><td><input id="totalb"class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
+                                <tr><td>9</td><td><input id="taxc" class="w3-input skcalculation" type="number" name="taxc" step="0.01"  value="<?=$row['tax18']?>" step="0.01" tabindex="6"size="6"/></td><td><input id="roundoffc" class="w3-input" type="number" name=""  step="0.01" size="6"/></td><td><input id="grossc" class="w3-input skcalculation1" type="number" name="grossc" step="0.01" value="<?=$row['tax18']?>" size="6"/></td><td><input id="sgstc" class="w3-input skcalculation2" type="number" name="sgstc" value="<?=$row['gst18']?>" step="0.01" size="6"/></td><td><input id="cgstc" class="w3-input" type="number" name="" value="<?=$row['gst18']?>" step="0.01" size="6"/></td><td><input id="totalc"class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
+                                <tr><td>14</td><td><input id="taxd" class="w3-input skcalculation" type="number" name="taxd" step="0.01" value="<?=$row['tax28']?>"  step="0.01" tabindex="7"size="6"/></td><td><input id="roundoffd"class="w3-input" type="number" name=""  step="0.01" size="6"/></td><td><input id="grossd" class="w3-input skcalculation1" type="number" name="grossd" step="0.01" value="<?=$row['tax28']?>" size="6"/></td><td><input id="sgstd" class="w3-input skcalculation2" type="number" name="sgstd" value="<?=$row['gst28']?>" step="0.01" size="6"/></td><td><input id="cgstd" class="w3-input" type="number" name="" value="<?=$row['gst28']?>" step="0.01" size="6"/></td><td><input id="totald" class="w3-input" type="number" name="" step="0.01" size="6"/></td></tr>
+                                <tr><td>total</td><td><input id="taxtotal" class="w3-input skcalculation" type="number" step="0.01" name="taxtotal" step="0.01" size="6"/></td><td><input id="roundofftotal" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="grosstotal" class="w3-input skcalculation1" type="number" name="grosstotal" step="0.01" size="6"/></td><td><input id="sgsttotal" class="w3-input skcalculation2" type="number" name="sgsttotal" step="0.01" size="6"/></td><td><input id="cgsttotal" class="w3-input" type="number" name="" step="0.01" size="6"/></td><td><input id="totaltotal"class="w3-input" type="number" name="totaltotal" value="<?=$row['total']?>" step="0.01" size="6"/></td></tr>
                             </table>
                         </div>
                     </div>
@@ -107,7 +134,7 @@
                                             <th>Product Quantity</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="additemdiv" >
+                                    <tbody id="additemdiv" ><?=$itemsvar?>
                                     </tbody>
                                     <tfoot>
                                         <input name="items" id="items" class="w3-hide" value="">
@@ -130,7 +157,7 @@
                                 </div>
                             </div>
                         </div--><br>                    
-                        <button class="w3-button w3-block w3-dark-grey" type="submit" name="add" value="1" >ADD NEW </button>
+                        <button class="w3-button w3-block w3-dark-grey" type="submit" name="update"  value="<?=$_GET['pur_id']?>" >UPDATE</button>
                     </form>
                 </div>
             </div>
@@ -276,9 +303,18 @@
                 });
             });
 
-            var countitem = 0;
-            var tabindex = 10;
+            var countitem = <?=$countitem?>;
+            var tabindex = <?=$tabindex?>;
             var itemarray=[];
+            var arrayFromPHP = <?php echo json_encode($itemarray); ?>;
+            $.each(arrayFromPHP, function (i, elem) {
+                temp=[];
+                temp[0]=elem[0];
+                temp[1]=elem[1];
+                itemarray[i]=temp;
+            });
+            
+            $("#items").val(itemarray);
             $("#addproduct").click(function(){
                 event.preventDefault();
                 var itemname =$("#prd_name").val();

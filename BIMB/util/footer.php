@@ -26,6 +26,5 @@
         </script>
         <script src="../util/jquery/jquery.js"></script>
         <script src="../util/jquery-ui-1.12.1/jquery-ui.js"></script>
-		    <script src="../util/DataTables/datatables.min.js"></script>
 
     
