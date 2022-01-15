@@ -74,27 +74,40 @@ class Product{
     public $prd_id = "";
     public $pdo="";
 
-    function __construct($pdo,$prd_id) {
+    function __construct($pdo,$prd_id,$startdate,$enddate) {
         $this->prd_id = $prd_id;
         $this->pdo = $pdo;
+        $this->startdate=$startdate;
+        $this->enddate=$enddate;
         $this->getinfo();
     }
     function getinfo(){
         //SELECT `products`.`prd_id`, `prd_name` ,`suppliers`.`supp_name` FROM `products` left join `products_supplier` on `products`.`prd_id`= `products_supplier`.`prd_id` left join `suppliers` on `suppliers`.`supp_id`=`products_supplier`.`supp_id` ORDER BY `suppliers`.`supp_name` ASC,prd_name Asc
         $stmt = $this->pdo->prepare('SELECT `prd_name` ,`suppliers`.`supp_name`,`suppliers`.`supp_id` FROM `products` left join `products_supplier` on `products`.`prd_id`= `products_supplier`.`prd_id` left join `suppliers` on `suppliers`.`supp_id`=`products_supplier`.`supp_id` Where `products`.`prd_id`=:prd_id');
         $stmt->execute(array(':prd_id' => $this->prd_id));
-        $this->suppliers = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        $stmt = $this->pdo->prepare('SELECT `prd_name` ,`suppliers`.`supp_name`,`suppliers`.`supp_id` FROM `products` left join `products_supplier` on `products`.`prd_id`= `products_supplier`.`prd_id` left join `suppliers` on `suppliers`.`supp_id`=`products_supplier`.`supp_id` Where `products`.`prd_id`=:prd_id');
-        $stmt->execute(array(':prd_id' => $this->prd_id));
-        $this->suppliers = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+        $this->suppliers = $stmt->fetchall(PDO::FETCH_ASSOC);
+
+        $stmt = $this->pdo->prepare('SELECT SUM(`qnt`) as sm FROM `purchase_product` join purchase on purchase.pur_id=purchase_product.pur_id WHERE purchase.pur_date BETWEEN :startdate and :enddate and prd_id=:prd_id GROUP By purchase_product.prd_id ORDER BY `sm`  DESC');
+        //$stmt->execute(array(':prd_id' => $this->prd_id,':startdate'=>$this->startdate,':enddate'=>$this->enddate));
+        if ($stmt->execute(array(':prd_id' => $this->prd_id,':startdate'=>$this->startdate,':enddate'=>$this->enddate))) {
+            $supp = $stmt->fetch(PDO::FETCH_ASSOC);
+            $this->bought=$supp['sm'];
+        } else{
+            print_r("here");
+            $this->bought=0;
+        }
+
+        print_r($this->suppliers);
+        //print_r($this->supp);
+        //print_r($this->startdate);
+        //print_r($this->enddate);
+        print_r($this->bought);
     }
 }
 
 //$DbClassObj= new Dbclass();
 //$pdo=$DbClassObj->connect();
-
+//$a=new Product($pdo,1,'2020-04-01','2021-03-31')
 //$a=new payment_mode($pdo);
 //$atz=[];
 //$stmt = $pdo->prepare("SELECT `pur_id` FROM `purchase` WHERE pur_date BETWEEN '2020-04-01' and '2021-03-31'");

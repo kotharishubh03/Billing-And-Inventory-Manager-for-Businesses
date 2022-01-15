@@ -14,8 +14,8 @@ echo('<nav class="w3-sidebar w3-bar-block w3-black w3-collapse w3-top" style="z-
         else {echo('<a href="../supplier/index.php" class="w3-bar-item w3-button"><i class="fa fa-truck w3-margin-right"></i>Suppliers</a>');}
     if ($st==3){echo('<a href="../products/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-address-book w3-margin-right"></i>Products</a>');} 
         else {echo('<a href="../products/index.php" class="w3-bar-item w3-button"><i class="fa fa-address-book w3-margin-right"></i>Products</a>');}
-    if ($st==4){echo('<a href="../payment/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-id-card w3-margin-right"></i>Payments</a>');} 
-        else {echo('<a href="../payment/index.php" class="w3-bar-item w3-button"><i class="fa fa-id-card w3-margin-right"></i>Payments</a>');}
+    if ($st==4){echo('<a href="../payment/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-money w3-margin-right"></i>Payments</a>');} 
+        else {echo('<a href="../payment/index.php" class="w3-bar-item w3-button"><i class="fa fa-money w3-margin-right"></i>Payments</a>');}
     if ($st==5){echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-pie-chart w3-margin-right"></i>GST reports</a>');} 
         else {echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button"><i class="fa fa-pie-chart w3-margin-right"></i>GST reports</a>');}
     echo('<a href="./logout.php" class="w3-bar-item w3-button"><i class="fa fa-arrow-left w3-margin-right"></i>Logout</a>
@@ -76,7 +76,7 @@ function flashMessage()
 }
 
 
-function DateOptionADD($adz){
+function DateOptionADD($adz,$prnt,$goto){
     global $startdate;
     global $enddate;
     global $FY;
@@ -101,17 +101,41 @@ function DateOptionADD($adz){
     if ($TodayMonth<4){
         $TodayYear=$TodayYear-1;
     }
-    $Year=$TodayYear-3;
-    for ($i=0;$i<6;$i++){
-        if ($Year==$TodayYear){
-            echo('<option value="./index.php?fy='.$Year.'" selected>'.$Year.'-'.($Year+1).'</option>');
-            $FY=$Year.'-'.($Year+1);
+    $Year=$TodayYear-2;
+    if ($prnt==1){
+        for ($i=0;$i<5;$i++){
+            if ($Year==$TodayYear){
+                echo('<option class="w3-grey" value="'.$goto.$Year.'" selected>'.$Year.'-'.($Year+1).'</option>');
+                $FY=$Year.'-'.($Year+1);
+            }
+            else{
+                echo('<option value="'.$goto.$Year.'">'.$Year.'-'.($Year+1).'</option>');
+            }
+            $Year=$Year+1;
         }
-        else{
-            echo('<option value="./index.php?fy='.$Year.'">'.$Year.'-'.($Year+1).'</option>');
-        }
-        $Year=$Year+1;
     }
 
 }
+
+////need to be updated 
+function updatefydata($adz,$pdo){
+    $adz1=$adz-1;
+    $prdarr=[];
+    $stmt = $pdo->prepare('SELECT `prd_id`, SUM(`qnt`) as sm FROM `purchase_product` join purchase on purchase.pur_id=purchase_product.pur_id WHERE purchase.pur_date BETWEEN :startdate and :enddate GROUP By purchase_product.prd_id');
+    $stmt->execute(array(':startdate'=>date($adz1.'-04-01'), ':enddate'=>date($adz.'-03-31')));
+    $row = $stmt->fetchall();
+    foreach ($row as $r) {
+        $prdarr[$r["prd_id"]]["bought"]=$r["sm"];
+    }
+
+    $stmt = $pdo->prepare('SELECT count(0) as prd_id,COUNT(0) as s');
+    $stmt->execute(array());
+    $row = $stmt->fetchall();
+    foreach ($row as $r) {
+        $prdarr[$r["prd_id"]]["sold"]=$r["s"];
+    }
+
+}
+
+
 ?>

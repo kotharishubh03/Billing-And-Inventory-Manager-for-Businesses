@@ -40,7 +40,8 @@
         <title>Add New Purchase</title>
     </head>
     <body class="w3-content" style="max-width:1350px">
-        <?php mainbody(0,"Add New Purchase");
+        <?php 
+            mainbody(0,"Add New Purchase");
             flashMessage();
         ?>
         <!-- items grid -->

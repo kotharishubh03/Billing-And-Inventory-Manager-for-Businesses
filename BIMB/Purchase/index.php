@@ -21,11 +21,11 @@
                 <?php
                     if (isset($_GET['fy'])) {
                         $_SESSION['fy']=$_GET['fy'];
-                        DateOptionADD($_GET['fy']); //params 0-today or '2018'
+                        DateOptionADD($_GET['fy'],1,'./index.php?fy='); //params 0-today or '2018'
                         $_GET["FY"]=$FY;
                     }
                     else{
-                        DateOptionADD(0);
+                        DateOptionADD(0,1,'./index.php?fy=');
                         $_GET["FY"]=$FY;
                     } 
                 ?>
