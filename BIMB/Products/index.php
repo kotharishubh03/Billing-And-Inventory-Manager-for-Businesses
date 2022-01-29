@@ -116,7 +116,7 @@
                         <th rowspan="2" >Total Sold</th>
                         <th rowspan="2" >Balance remaining</th>
                         <?php
-                        $months=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        $months=['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December','January', 'February', 'March'];
                         foreach($months as $month){
                             echo('<th class="w3-center" colspan="2" >'.$month.'</th>');
                         }

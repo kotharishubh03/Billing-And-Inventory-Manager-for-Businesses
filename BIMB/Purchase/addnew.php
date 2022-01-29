@@ -53,7 +53,7 @@
                     <div class="w3-row">
                         <div class="w3-col m5 w3-padding ">
                             <label for="supp_name">Supplier name:</label>
-                            <input id="supp_name" class="w3-input" type="text" name="supp_name" size="30" tabindex="1" required/>
+                            <input id="supp_name" class="w3-input" type="text" name="supp_name" size="30" placeholder="Type 'all' for All Suppliers" tabindex="1" required/>
                         </div><div class="w3-col m5 w3-padding ">
                             <label for="pur_date">Date.:</label>
                             <input class="w3-input" type="date" name="pur_date" size="30" required tabindex="2"/>

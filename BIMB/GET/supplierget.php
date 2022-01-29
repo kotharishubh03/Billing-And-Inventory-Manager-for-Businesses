@@ -1,6 +1,6 @@
 <?php
 require_once "..//util/pdo.php";
-if ($_REQUEST['term']=="a"){
+if ($_REQUEST['term']=="all"){
     $stmt = $pdo->prepare('SELECT supp_name FROM suppliers order by supp_name');
     $stmt->execute(array());
     $retval = array();
