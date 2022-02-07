@@ -16,7 +16,7 @@
                 $stmt = $pdo->prepare('INSERT INTO `supp_pay_purchase` (`pur_id`, `payment_id`) VALUES ((SELECT `pur_id` FROM `purchase` WHERE `bill_no`=:billno and `supp_id`=(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:s_name limit 1)),:payment_id)');
                 $stmt->execute(array(':s_name'=> $_POST['s_name'], ':billno'=> $r, ':payment_id'=> $payment_id));
             }
-            $_SESSION['success']="Successfully Saved ! Add Another Product";
+            $_SESSION['success']="Successfully Saved ! Add Another Payment";
             header("Location: ./addnew.php");
             return;
         }
@@ -25,20 +25,13 @@
     require_once "..//util/header.php";
 ?>
         <title>Add New Payments</title>
-        <style>
-            .ui-autocomplete {
-                max-height: 100px;
-                overflow-y: auto;
-                overflow-x: hidden;
-            }
-            * html .ui-autocomplete {
-                height: 200px;
-            }
-        </style>
     </head>
     <body class="w3-content" style="max-width:1350px">
         <?php mainbody(4,"Payments") ?>
         <!-- items grid -->
+        <div class="w3-container">
+            <?php flashMessage(); ?>
+        </div>
         <div class="w3-container">
             <div class="w3-card-4 w3-margin">
                 <header class="w3-container w3-light-grey">

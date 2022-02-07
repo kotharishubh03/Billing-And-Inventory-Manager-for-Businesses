@@ -62,13 +62,18 @@ function mainbody($n,$name) {
 function flashMessage()
 {
     if (isset($_SESSION['error'])) {
-        echo('<div class="w3-panel w3-red"><h3>Error!</h3>
+        echo('<div class="w3-panel w3-red w3-display-container"><h3>Error!</h3>
+        <span onclick="this.parentElement.style.display=\'none\'"
+        class="w3-button w3-red w3-large w3-display-topright">x</span>
             <p>' . htmlentities($_SESSION['error']) . '</p>
         </div>');
         unset($_SESSION['error']);
     }
     if (isset($_SESSION['success'])) {
-        echo('<div class="w3-panel w3-green"><h3>Success!</h3>
+        echo('
+        <div class="w3-panel w3-green w3-display-container"><h3>Success!</h3>
+        <span onclick="this.parentElement.style.display=\'none\'"
+        class="w3-button w3-red w3-large w3-display-topright">x</span>
             <p>' . htmlentities($_SESSION['success']) . '</p>
         </div>');
         unset($_SESSION['success']);
@@ -89,7 +94,7 @@ function DateOptionADD($adz,$prnt,$goto){
         }
         else{
             $startdate=$TodayYear.'-04-01';
-            $enddate=($TodayYear-1).'-03-31';
+            $enddate=($TodayYear+1).'-03-31';
         }
     }
     else {
@@ -137,5 +142,5 @@ function updatefydata($adz,$pdo){
 
 }
 
-
+session_start();
 ?>

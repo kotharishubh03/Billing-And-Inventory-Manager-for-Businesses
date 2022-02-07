@@ -25,11 +25,11 @@
         <title>Products | ADD NEW PRODUCTS</title>
     </head>
     <body class="w3-content" style="max-width:1350px">
-        <?php 
-            mainbody(3,"Products | ADD NEW PRODUCTS");
-            flashMessage();
-        ?>
+        <?php mainbody(3,"Products | ADD NEW PRODUCTS"); ?>
         <!-- items grid -->
+        <div class="w3-container">
+            <?php flashMessage(); ?>
+        </div>
 
         <div class="w3-row">
             <br>

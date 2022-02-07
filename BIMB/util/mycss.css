@@ -19,3 +19,15 @@
 .sk-table td {
     border: 1px solid  rgba(153, 153, 153, 0.986);
 }
+
+.sk-border-except-bottom {
+    border-top:1px solid #ccc!important;
+    border-left:1px solid #ccc!important;
+    border-right:1px solid #ccc!important;
+}
+
+.sk-border-except-top {
+    border-bottom:1px solid #ccc!important;
+    border-left:1px solid #ccc!important;
+    border-right:1px solid #ccc!important;
+}

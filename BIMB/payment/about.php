@@ -2,30 +2,18 @@
 require_once "..//util/pdo.php";
 require_once "..//util/functions.php";
 
-if (isset($_POST["add"])) {
-    if ($_POST["add"] == 1) {
-        $stmt = $pdo->prepare('INSERT INTO `suppliers_payment`(`pay_type`, `supp_id`, `amount`, `date`, `chq_no`) VALUES ((SELECT `pay_mode_id` FROM `payment_mode` WHERE `pay_mode`=:paymode Limit 1),(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name limit 1),:amt,:pay_date,:chqno)');
-        $stmt->execute(array(':paymode' => $_POST['paymode'], ':supp_name' => $_POST['supp_name'], ':amt' => $_POST['amt'], ':pay_date' => date("Y-m-d", strtotime($_POST['pay_date'])), ':chqno' => $_POST['chqno']));
-        $payment_id = $pdo->lastInsertId();
-
-        $pay_bill_nos = explode(", ", rtrim($_POST['pay_bill_nos'], ", "));
-        foreach ($pay_bill_nos as $r) {
-            $stmt = $pdo->prepare('UPDATE `purchase` SET `pay_date`=:pay_date ,`pay_mode_id`=(SELECT `pay_mode_id` FROM `payment_mode` WHERE `pay_mode`=:paymode limit 1) WHERE `pur_id`=(SELECT `pur_id` FROM `purchase` WHERE `bill_no`=:billno and `supp_id`=(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name limit 1))');
-            $stmt->execute(array(':pay_date' => date("Y-m-d", strtotime($_POST['pay_date'])), ':paymode' => $_POST['paymode'], ':billno' => $r, ':supp_name' => $_POST['supp_name']));
-
-            $stmt = $pdo->prepare('INSERT INTO `supp_pay_purchase` (`pur_id`, `payment_id`) VALUES ((SELECT `pur_id` FROM `purchase` WHERE `bill_no`=:billno and `supp_id`=(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name limit 1)),:payment_id)');
-            $stmt->execute(array(':supp_name' => $_POST['supp_name'], ':billno' => $r, ':payment_id' => $payment_id));
-        }
-        $_SESSION['success'] = "Successfully Saved ! Add Another Product";
-        header("Location: ./addnew.php");
-        return;
-    }
-}
 
 if (isset($_POST["edit"])) {
-    $stmt = $pdo->prepare('INSERT INTO `suppliers_payment`(`pay_type`, `supp_id`, `amount`, `date`, `chq_no`) VALUES ((SELECT `pay_mode_id` FROM `payment_mode` WHERE `pay_mode`=:paymode Limit 1),(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name limit 1),:amt,:pay_date,:chqno)');
-    $stmt->execute(array(':paymode' => $_POST['paymode'], ':supp_name' => $_POST['supp_name'], ':amt' => $_POST['amt'], ':pay_date' => date("Y-m-d", strtotime($_POST['pay_date'])), ':chqno' => $_POST['chqno']));
-    $payment_id = $pdo->lastInsertId();
+    $payment_id = $_POST["edit"];
+
+    $stmt = $pdo->prepare('DELETE FROM `supp_pay_purchase` WHERE payment_id=:payment_id');
+    $stmt->execute(array(':payment_id'=>$payment_id)); 
+
+    $stmt = $pdo->prepare('DELETE FROM `suppliers_payment` WHERE payment_id=:payment_id');
+    $stmt->execute(array(':payment_id'=>$payment_id)); 
+
+    $stmt = $pdo->prepare('INSERT INTO `suppliers_payment`(`payment_id`,`pay_type`, `supp_id`, `amount`, `date`, `chq_no`) VALUES (:payment_id,(SELECT `pay_mode_id` FROM `payment_mode` WHERE `pay_mode`=:paymode Limit 1),(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name limit 1),:amt,:pay_date,:chqno)');
+    $stmt->execute(array(':payment_id'=>$payment_id,':paymode' => $_POST['paymode'], ':supp_name' => $_POST['supp_name'], ':amt' => $_POST['amt'], ':pay_date' => date("Y-m-d", strtotime($_POST['pay_date'])), ':chqno' => $_POST['chqno']));
 
     $pay_bill_nos = explode(", ", rtrim($_POST['pay_bill_nos'], ", "));
     foreach ($pay_bill_nos as $r) {
@@ -35,8 +23,8 @@ if (isset($_POST["edit"])) {
         $stmt = $pdo->prepare('INSERT INTO `supp_pay_purchase` (`pur_id`, `payment_id`) VALUES ((SELECT `pur_id` FROM `purchase` WHERE `bill_no`=:billno and `supp_id`=(SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name limit 1)),:payment_id)');
         $stmt->execute(array(':supp_name' => $_POST['supp_name'], ':billno' => $r, ':payment_id' => $payment_id));
     }
-    $_SESSION['success'] = "Successfully Saved ! Add Another Product";
-    header("Location: ./addnew.php");
+    $_SESSION['success'] = "Successfully Saved !";
+    header("Location: ./about.php?pay_id=".$payment_id);
     return;
 }
 
@@ -55,12 +43,15 @@ foreach ($billinfo as $row) {
 
 require_once "..//util/header.php";
 ?>
-<title>Add New Payments</title>
+<title>About Payments</title>
 </head>
 
 <body class="w3-content" style="max-width:1350px">
     <?php mainbody(4, "Payments") ?>
     <!-- items grid -->
+    <div class="w3-container">
+        <?php flashMessage(); ?>
+    </div>
     <div class="w3-container">
         <div class="w3-card-4 w3-margin">
             <header class="w3-container w3-light-grey">

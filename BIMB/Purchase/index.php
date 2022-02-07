@@ -1,9 +1,6 @@
 <?php
     require_once "..//util/pdo.php";
-    require_once "..//util/Classes.php";
-    require_once "..//util/functions.php";
-
-    session_start();
+    require_once "..//util/functions.php"; 
 ?>
     
 <?php
