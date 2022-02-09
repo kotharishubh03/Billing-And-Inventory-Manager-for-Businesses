@@ -4,78 +4,64 @@
     require_once "..//util/Classes.php";
 
     if(isset($_POST["add"])) {
-        if ($_POST["add"]==1) {
-            $stmt = $pdo->prepare('SELECT cus_id FROM `customers` WHERE `cus_name`=:cus_name');
-            $stmt->execute(array(':cus_name'=> $_POST['cus_name']));
-            $rows = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if(empty($rows['cus_id'])){
-                $stmt = $pdo->prepare('INSERT INTO `customers`(`cus_name`, `mobile_no`) VALUES (:cus_name,:mob_no)');
-                $stmt->execute(array(':cus_name'=> $_POST['cus_name'],':mob_no'=> $_POST['cus_mob']));
-                $cus_id = $pdo->lastInsertId();
-            } else {
-                $cus_id = $rows['cus_id'];
-            }
+        $stmt = $pdo->prepare('SELECT cus_id FROM `customers` WHERE `cus_name`=:cus_name');
+        $stmt->execute(array(':cus_name'=> $_POST['cus_name']));
+        $rows = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if(empty($rows['cus_id'])){
+            $stmt = $pdo->prepare('INSERT INTO `customers`(`cus_name`, `mobile_no`) VALUES (:cus_name,:mob_no)');
+            $stmt->execute(array(':cus_name'=> $_POST['cus_name'],':mob_no'=> $_POST['cus_mob']));
+            $cus_id = $pdo->lastInsertId();
+        } else {
+            $cus_id = $rows['cus_id'];
+        }
 
-            $TodayYear = idate("Y",strtotime($_POST['pur_date']));
-            $TodayMonth = idate("m",strtotime($_POST['pur_date']));
-            if($TodayMonth<4){
-                $startdate=($TodayYear-1).'-04-01';
-                $enddate=$TodayYear.'-03-31';
-                $FY=($TodayYear-2001).'-'.($TodayYear-2000);
+        $TodayYear = idate("Y",strtotime($_POST['pur_date']));
+        $TodayMonth = idate("m",strtotime($_POST['pur_date']));
+        if($TodayMonth<4){
+            $startdate=($TodayYear-1).'-04-01';
+            $enddate=$TodayYear.'-03-31';
+            $FY=($TodayYear-2001).'-'.($TodayYear-2000);
+        }
+        else{
+            $startdate=$TodayYear.'-04-01';
+            $enddate=($TodayYear+1).'-03-31';
+            $FY=($TodayYear-2000).'-'.($TodayYear-1999);
+        }
+
+        $stmt = $pdo->prepare('SELECT bill_no FROM `sales` WHERE sale_date between :startdate and :enddate ORDER BY `bill_no` DESC limit 1');
+        $stmt->execute(array(':startdate'=> date("Y-m-d", strtotime($startdate)),':enddate'=> date("Y-m-d", strtotime($enddate))));
+        $rows = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if(empty($rows['bill_no'])){
+            $bill_no='SEHC-'.$FY.'/1';
+        } else {
+            $bill_no = $rows['bill_no'];
+            $temp=explode("/",rtrim($bill_no," "));
+            $bill_no='SEHC-'.$FY.'/'.($temp[1]+1);
+        }
+
+        $stmt = $pdo->prepare('INSERT INTO `sales`(`cus_id`, `bill_no`, `sale_date`, `total`, `discount`, `pay_type`, `pay_date`) VALUES 
+            (:cus_id,:bill_no,:sale_date,:total,:disc,(SELECT `pay_mode_id` FROM `payment_mode` WHERE `pay_mode`=:pay_mode),:pay_date)');
+        $stmt->execute(array(':cus_id'=>$cus_id,':bill_no'=>$bill_no,':sale_date'=> date("Y-m-d", strtotime($_POST['pur_date'])),':total'=> $_POST['billtotal'],':disc'=> $_POST['disc'],':pay_mode'=> $_POST['paymode'],':pay_date'=> date("Y-m-d", strtotime($_POST['pay_date']))));
+        $sale_id = $pdo->lastInsertId();
+
+        for ($i=1;$i<50;$i++){
+            $temp='prd_id_'.$i;
+            if(isset($_POST[$temp])){
+                $stmt = $pdo->prepare('INSERT INTO `sales_product`(`sale_id`, `prd_id`, `qnt`, `sell_price`) VALUES (:sale_id,:prd_id,:qnt,:sp)');
+                $stmt->execute(array(':sale_id'=>$sale_id,':prd_id'=>$_POST[$temp],':qnt'=> $_POST['Qnt_'.$i],':sp'=> $_POST['sp_'.$i]));
             }
             else{
-                $startdate=$TodayYear.'-04-01';
-                $enddate=($TodayYear+1).'-03-31';
-                $FY=($TodayYear-2000).'-'.($TodayYear-1999);
+                break;
             }
-
-            $stmt = $pdo->prepare('SELECT bill_no FROM `sales` WHERE sale_date between :startdate and :enddate ORDER BY `bill_no` DESC limit 1');
-            $stmt->execute(array(':startdate'=> date("Y-m-d", strtotime($startdate)),':enddate'=> date("Y-m-d", strtotime($enddate))));
-            $rows = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if(empty($rows['bill_no'])){
-                $bill_no='SEHC-'.$FY.'/1';
-            } else {
-                $bill_no = $rows['bill_no'];
-                $temp=explode("/",rtrim($bill_no," "));
-                $bill_no='SEHC-'.$FY.'/'.($temp[1]+1);
-            }
-
-            $stmt = $pdo->prepare('INSERT INTO `sales`(`cus_id`, `bill_no`, `sale_date`, `total`, `discount`, `pay_type`, `pay_date`) VALUES 
-                (:cus_id,:bill_no,:sale_date,:total,:disc,(SELECT `pay_mode_id` FROM `payment_mode` WHERE `pay_mode`=:pay_mode),:pay_date)');
-            $stmt->execute(array(':cus_id'=>$cus_id,':bill_no'=>$bill_no,':sale_date'=> date("Y-m-d", strtotime($_POST['pur_date'])),':total'=> $_POST['billtotal'],':disc'=> $_POST['disc'],':pay_mode'=> $_POST['paymode'],':pay_date'=> date("Y-m-d", strtotime($_POST['pay_date']))));
-            $sale_id = $pdo->lastInsertId();
-
-            for ($i=1;$i<50;$i++){
-                $temp='prd_id_'.$i;
-                if(isset($_POST[$temp])){
-                    $stmt = $pdo->prepare('INSERT INTO `sales_product`(`sale_id`, `prd_id`, `qnt`, `sell_price`) VALUES (:sale_id,:prd_id,:qnt,:sp)');
-                    $stmt->execute(array(':sale_id'=>$sale_id,':prd_id'=>$_POST[$temp],':qnt'=> $_POST['Qnt_'.$i],':sp'=> $_POST['sp_'.$i]));
-                }
-                else{
-                    break;
-                }
-            }
-            
-            $_SESSION['success']="Successfully Saved ! Add Another Product";
-            header("Location: ./addnew.php");
-            return;
         }
+        
+        $_SESSION['success']="Successfully Saved ! Add Another Product";
+        $_SESSION['print']=$sale_id;
+        header("Location: ./addnew.php");
+        return;
     }
-    
-    
-    /*
-    <?php if(condition_to_check_for){ ?>
-
-    <script type="text/javascript">
-       window.open('url_goes_here', '_blank');
-    </script>
-
-<?  } ?>
-    
-    
-    */ 
 
     require_once "..//util/header.php";
 ?>
@@ -153,16 +139,16 @@
                                         <tr><th colspan="6"></th></tr>
                                         <tr>
                                             <th colspan="4" class="w3-right-align w3-xlarge"><b>Discount</b></th>
-                                            <th><input id="discp" class="w3-input w3-medium" type="text" size="6" value="0"/></th>
-                                            <th><input id="disc" name="disc" class="w3-input w3-medium" type="text" size="6" value="0"/></th>
+                                            <th><input id="discp" class="w3-input w3-medium" type="text" size="6" value="0"  tabindex="26"/></th>
+                                            <th><input id="disc" name="disc" class="w3-input w3-medium" type="text" size="6" value="0" tabindex="27"/></th>
                                         </tr>
                                         <tr>
                                             <th colspan="5" class="w3-right-align w3-xlarge"><b>Round OFF</b></th>
-                                            <th><input id="RoundUp" name="RoundUp" class="w3-input w3-medium" type="text" size="6" value="0"/></th>
+                                            <th><input id="RoundUp" name="RoundUp" class="w3-input w3-medium" type="text" size="6" value="0" tabindex="28"/></th>
                                         </tr>
                                         <tr>
                                             <th colspan="5" class="w3-right-align w3-xlarge"><b>Total</b></th>
-                                            <th><input id="billtotal" name="billtotal" class="w3-input w3-large" type="text" size="6" value="0"/></th>
+                                            <th><input id="billtotal" name="billtotal" class="w3-input w3-large" type="text" size="6" value="0" tabindex="29"/></th>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -175,10 +161,10 @@
                         </div>
                         <div class="w3-row">
                             <div class="w3-col m4 w3-padding ">
-                                <input id="paymode" class="w3-input" type="text" name="paymode" size="6" placeholder="Enter Payment Mode" tabindex="4"/>
+                                <input id="paymode" class="w3-input" type="text" name="paymode" size="6" placeholder="Enter Payment Mode" tabindex="30"/>
                             </div>
                             <div class="w3-col m4 w3-padding ">
-                                <input id="pay_date" class="w3-input" type="date" name="pay_date" size="30" required value='<?php echo date('Y-m-d');?>' tabindex="3"/>
+                                <input id="pay_date" class="w3-input" type="date" name="pay_date" size="30" required value='<?php echo date('Y-m-d');?>' tabindex="31"/>
                             </div>
                         </div><hr>
                         <button class="w3-button w3-left w3-margin-bottom w3-dark-grey" style="width:49%" type="submit" name="add" value="1" >ADD NEW </button>
@@ -300,6 +286,14 @@
                 $("#billtotal").val(temp);
                 $("#RoundUp").val((billtotal-temp).toFixed(2));
             });
+            <?php
+                if(isset($_SESSION['print'])) {
+                    echo('window.open(\' ./print.php?sale_id='.$_SESSION['print'].' \', \' _blank \');');
+                    unset($_SESSION['print']);
+                    echo('alert("Allow Popups Right side on URL bar ");');
+                }
+            ?>
+
         });
         </script>
     </body>
