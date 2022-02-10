@@ -113,7 +113,7 @@ require_once "..//util/header.php";
         </tr>
         <tr>
             <td colspan="6" class="w3-small sk-no-border" style="width:60%">
-                <div class="w3-center"><b>TERMS AND CONDITION </b></div><br>
+                <div class="w3-center"><b>TERMS AND CONDITION</b></div><br>
                 <?=$shopinfo['shop_bill_terms']?>
 
             </td>
