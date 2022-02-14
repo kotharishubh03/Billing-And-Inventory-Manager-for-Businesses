@@ -3,8 +3,6 @@
     require_once "..//util/Classes.php";
     require_once "..//util/functions.php";
 
-    session_start();
-
     if(isset($_POST['add'])){
         $stmt = $pdo->prepare('INSERT INTO `purchase`(`supp_id`, `pur_date`, `bill_no`, `total`, `tax5`, `gst5`, `tax12`, `gst12`, `tax18`, `gst18`, `tax28`, `gst28`)
         VALUES ((SELECT `supp_id` FROM `suppliers` WHERE `supp_name`=:supp_name), :pur_date, :bill_no, :total, :tax5, :gst5, :tax12, :gst12, :tax18, :gst18, :tax28, :gst28)');

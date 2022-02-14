@@ -226,7 +226,7 @@
                                 foreach ($billpending as $r){
                                     $totalrem=$totalrem+$r["total"];
                                     echo('<tr>
-                                    <td><b>'.$r["pur_date"].'</b></td>
+                                    <td><b>'.date("d-m-Y", strtotime($r["pur_date"])).'</b></td>
                                     <td><b><a href="../purchase/about.php?pur_id='.$r["pur_id"].'">'.$r["bill_no"].'</a></b></td>
                                     <td><b>'.$r["total"].'</b></td>
                                     </tr>');

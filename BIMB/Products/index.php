@@ -25,7 +25,7 @@
     $stmt->execute(array());
     $row = $stmt->fetchall();
     foreach ($row as $r) {
-        $prdarr[$r["prd_id"]]["supp_name"]=$prdarr[$r["prd_id"]]["supp_name"].'<a href="../supliers/about.php?supp_id='.$r["supp_id"].'">'.$r["supp_name"].'</a>,';
+        $prdarr[$r["prd_id"]]["supp_name"]=$prdarr[$r["prd_id"]]["supp_name"].'<a href="../supplier/about.php?supp_id='.$r["supp_id"].'">'.$r["supp_name"].'</a>,';
     }
 
     //var_dump($prdarr);

@@ -42,23 +42,43 @@
 
         </div>
 
-        <!--div class="w3-row w3-responsive w3-margin">
             <?php
-                $months=['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December','January', 'February', 'March'];
+                $month_variable=[4,5,6,7,8,9,10,11,12,1,2,3];
+                $month_string=["April","May","June","July","August","September","October","November","December","January","February","March"];
                 echo('<div class="w3-bar w3-black sk-border-except-bottom">');
                 for ($i=0;$i<12;$i++){
-                    echo('<button class="w3-bar-item w3-button tablink" onclick="openCity(event,\''.$months[$i].'\')">'.$months[$i].'</button>');
+                    echo('<button class="w3-bar-item w3-button tablink" onclick="openCity(event,\''.$month_string[$i].'\')">'.$month_string[$i].'</button>');
                 }
                 echo('</div>');
             
-            for ($i=0;$i<12;$i++){
-                echo('<div id="'.$months[$i].'" class="w3-container sk-border-except-top city" style="display:none">
-                    <h2>'.$months[$i].'</h2>
-                    
-                </div>');
+                for ($i=0;$i<12;$i++){
+                    $temp=0;
+                    $disc=0;
+                    $stmt = $pdo->prepare('SELECT `sale_id`, customers.`cus_id`,`cus_name`, `bill_no`, `sale_date`, `total`, `discount`, `pay_type`,`pay_mode`, `pay_date` FROM `sales` join customers on customers.`cus_id`=sales.cus_id join payment_mode on sales.pay_type=payment_mode.pay_mode_id WHERE Month(`sale_date`)=:mont and `sale_date` BETWEEN :startdate and :enddate ORDER BY `sale_date` ASC');
+                    $stmt->execute(array(':mont'=>$month_variable[$i], ':startdate'=>date($startdate), ':enddate'=>date($enddate)));
+                    $row = $stmt->fetchall();
+                    echo('<div id="'.$month_string[$i].'" class="w3-container sk-border-except-top city" style="display:none">
+                        <h2>'.$month_string[$i].' ('.$_GET["FY"].')'.'</h3>');
+                        if ( $row == false ) {
+                            echo('<div class="w3-panel w3-blue">
+                            <h3>No Record\'s Found!</h3>
+                            <p>You Dont have any record For this Financial Year.</p>
+                          </div>');
+                        } else {
+                            echo('<div class="w3-responsive"><table class="w3-table-all w3-small w3-centered sk-table">');
+                            echo('<tr> <th>Customer</th> <th>Bill No</th> <th>Sale Date</th> <th>Total</th> <th>Discount</th> <th>Payment Mode</th> <th>Payment Date</th></tr>');
+                            foreach($row as $r) {
+                                $temp=$temp+$r['total'];
+                                $disc=$disc+$r['discount'];
+                                echo('<tr> <th>'.$r['cus_name'].'</th> <th><a href="../sales/about.php?sale_id='.$r["sale_id"].'">'.$r['bill_no'].'</a></th> <th>'.date("d-m-Y", strtotime($r['sale_date'])).'</th> <th>'.$r['total'].'</th> <th>'.$r['discount'].'</th> <th>'.$r['pay_mode'].'</th> <th>'.date("d-m-Y", strtotime($r['pay_date'])).'</th></tr>');
+                            }
+                            echo('<tr> <th colspan="7"></th></tr>');
+                            echo('<tr class="w3-yellow"> <th colspan="3">Total</th><th>'.$temp.'</th><th>'.$disc.'</th><th></th><th></th></tr>');
+                            echo('</table></div>');
+                        }
+                    echo('</div>');
             }
             ?>
-        </div-->
 
         <!-- END items grid -->
         <?php

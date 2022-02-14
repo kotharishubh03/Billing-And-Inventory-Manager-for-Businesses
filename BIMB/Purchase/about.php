@@ -3,8 +3,6 @@
     require_once "..//util/Classes.php";
     require_once "..//util/functions.php";
 
-    session_start();
-
     if(isset($_POST['update'])){
         $stmt = $pdo->prepare('DELETE FROM `purchase_product` WHERE pur_id=:pur_id');
         $stmt->execute(array(':pur_id'=>$_POST['update']));
