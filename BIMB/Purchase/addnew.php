@@ -1,6 +1,5 @@
 <?php
     require_once "..//util/pdo.php";
-    require_once "..//util/Classes.php";
     require_once "..//util/functions.php";
 
     if(isset($_POST['add'])){
@@ -27,7 +26,7 @@
         $_SESSION['success']="Successfully Saved ! Add Another Purchase";
 
         header('Location: ./addnew.php');
-        exit;
+        return;
     }
 
 ?>

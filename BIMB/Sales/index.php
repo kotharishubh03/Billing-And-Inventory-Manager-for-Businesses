@@ -70,7 +70,7 @@
                             foreach($row as $r) {
                                 $temp=$temp+$r['total'];
                                 $disc=$disc+$r['discount'];
-                                echo('<tr> <th>'.$r['cus_name'].'</th> <th><a href="../sales/about.php?sale_id='.$r["sale_id"].'">'.$r['bill_no'].'</a></th> <th>'.date("d-m-Y", strtotime($r['sale_date'])).'</th> <th>'.$r['total'].'</th> <th>'.$r['discount'].'</th> <th>'.$r['pay_mode'].'</th> <th>'.date("d-m-Y", strtotime($r['pay_date'])).'</th></tr>');
+                                echo('<tr> <th><a href="../customers/about.php?cus_id='.$r["cus_id"].'">'.$r['cus_name'].'</a></th> <th><a href="../sales/about.php?sale_id='.$r["sale_id"].'">'.$r['bill_no'].'</a></th> <th>'.date("d-m-Y", strtotime($r['sale_date'])).'</th> <th>'.$r['total'].'</th> <th>'.$r['discount'].'</th> <th>'.$r['pay_mode'].'</th> <th>'.date("d-m-Y", strtotime($r['pay_date'])).'</th></tr>');
                             }
                             echo('<tr> <th colspan="7"></th></tr>');
                             echo('<tr class="w3-yellow"> <th colspan="3">Total</th><th>'.$temp.'</th><th>'.$disc.'</th><th></th><th></th></tr>');

@@ -18,9 +18,12 @@ echo('<nav class="w3-sidebar w3-bar-block w3-black w3-collapse w3-top" style="z-
         else {echo('<a href="../payment/index.php" class="w3-bar-item w3-button"><i class="fa fa-money w3-margin-right"></i>Payments</a>');}
     if ($st==5){echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-pie-chart w3-margin-right"></i>GST reports</a>');} 
         else {echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button"><i class="fa fa-pie-chart w3-margin-right"></i>GST reports</a>');}
+    if ($st==6){echo('<a href="../customers/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-user w3-margin-right"></i>Customers</a>');} 
+        else {echo('<a href="../customers/index.php" class="w3-bar-item w3-button"><i class="fa fa-user w3-margin-right"></i>Customers</a>');}
     echo('<a href="./logout.php" class="w3-bar-item w3-button"><i class="fa fa-arrow-left w3-margin-right"></i>Logout</a>
     </div>
-    <a href="../Contact/index.php" class="w3-bar-item w3-button w3-padding">Contact Us</a>
+    <a href="../contact/index.php" class="w3-bar-item w3-button w3-padding">Contact Us</a>
+    <a href="../settings/index.php" class="w3-bar-item w3-button w3-padding">Settings</a>
 </nav>');
 }
 

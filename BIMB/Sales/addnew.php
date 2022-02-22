@@ -58,7 +58,9 @@
         }
         
         $_SESSION['success']="Successfully Saved ! Add Another sale";
-        $_SESSION['print']=$sale_id;
+        if ($_POST["add"]==2){
+            $_SESSION['print']=$sale_id;
+        }
         header("Location: ./addnew.php");
         return;
     }
