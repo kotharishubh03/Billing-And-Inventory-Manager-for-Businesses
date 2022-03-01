@@ -5,7 +5,9 @@ echo('<nav class="w3-sidebar w3-bar-block w3-black w3-collapse w3-top" style="z-
         <i onclick="w3_close()" class="fa fa-remove w3-hide-large w3-button w3-display-topright"></i>
             <h3 class="w3-wide"><b>BIMB</b></h3>
     </div>
-    <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">');
+    <div class="w3-padding-32 w3-large w3-text-grey" style="font-weight:bold">');
+    if ($st==-1){echo('<a href="../dashboard/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-line-chart w3-margin-right"></i>Dashboard</a>');} 
+        else {echo('<a href="../dashboard/index.php" class="w3-bar-item w3-button"><i class="fa fa-line-chart w3-margin-right"></i>Dashboard</a>');}
     if ($st==0){echo('<a href="../purchase/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-shopping-cart w3-margin-right"></i>Purchase</a>');} 
         else {echo('<a href="../purchase/index.php" class="w3-bar-item w3-button"><i class="fa fa-shopping-cart w3-margin-right"></i>Purchase</a>');}
     if ($st==1){echo('<a href="../sales/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-id-card w3-margin-right"></i>Sales</a>');} 
@@ -20,10 +22,17 @@ echo('<nav class="w3-sidebar w3-bar-block w3-black w3-collapse w3-top" style="z-
         else {echo('<a href="../gstreports/index.php" class="w3-bar-item w3-button"><i class="fa fa-pie-chart w3-margin-right"></i>GST reports</a>');}
     if ($st==6){echo('<a href="../customers/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-user w3-margin-right"></i>Customers</a>');} 
         else {echo('<a href="../customers/index.php" class="w3-bar-item w3-button"><i class="fa fa-user w3-margin-right"></i>Customers</a>');}
-    echo('<a href="./logout.php" class="w3-bar-item w3-button"><i class="fa fa-arrow-left w3-margin-right"></i>Logout</a>
+    if ($st==7){echo('<a href="../settings/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-gear w3-margin-right"></i>Settings</a>');} 
+        else {echo('<a href="../settings/index.php" class="w3-bar-item w3-button "><i class="fa fa-gear w3-margin-right"></i>Settings</a>');}
+    if ($st==8){echo('<a href="../contact/index.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-gear w3-margin-right"></i>Contact Us</a>');} 
+        else {echo('<a href="../contact/index.php" class="w3-bar-item w3-button "><i class="fa fa-gear w3-margin-right"></i>Contact Us</a>');}
+    if ($st==9){echo('<a href="./logout.php" class="w3-bar-item w3-button w3-black"><i class="fa fa-arrow-left w3-margin-right"></i>Logout</a>');} 
+        else {echo('<a href="./logout.php" class="w3-bar-item w3-button"><i class="fa fa-arrow-left w3-margin-right"></i>Logout</a>');}
+
+    echo('
+
     </div>
-    <a href="../contact/index.php" class="w3-bar-item w3-button w3-padding">Contact Us</a>
-    <a href="../settings/index.php" class="w3-bar-item w3-button w3-padding">Settings</a>
+
 </nav>');
 }
 

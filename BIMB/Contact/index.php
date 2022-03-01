@@ -10,7 +10,7 @@
         <title>Contact Us</title>
     </head>
     <body class="w3-content" style="max-width:1350px">
-        <?php mainbody(100,"Contact Us") ?>
+        <?php mainbody(8,"Contact Us") ?>
         <!-- items grid -->
         <div class="w3-row">
             <div class="w3-half">

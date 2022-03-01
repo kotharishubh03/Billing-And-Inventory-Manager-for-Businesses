@@ -2,6 +2,22 @@
     require_once "..//util/pdo.php";
     require_once "..//util/functions.php";
 
+    if(isset($_POST['print'])){
+        if(!isset($_POST['fy'])){
+            $TodayYear = idate("Y");
+            $TodayMonth = idate("m");
+            if($TodayMonth<4){
+                $repfy=$TodayYear-1;
+            }     
+        }
+        else{
+            $repfy=$_POST['fy'];
+        }
+        $_SESSION['print']=1;
+        $_SESSION['qtr']=$_POST['qtr'];
+        $_SESSION['repfy']=$repfy;
+    }
+
     if(isset($_POST['shop_info'])){
     
         $stmt = $pdo->prepare('SELECT `s_key` FROM `shop_info`');
@@ -59,14 +75,36 @@
                                 if(isset($_POST['qtr']) && $_POST['qtr']==4){echo('<option value="4" selected >QTR 4</option>');}else{echo('<option value="4">QTR 4</option>');} 
                             ?>
                         </select>
-                        <button class="w3-button w3-left w3-margin-bottom w3-dark-grey" style="width:49%" type="submit" name="add" value="1" >View </button>
-                        <button class="w3-button w3-right w3-margin-bottom w3-dark-grey" style="width:49%" type="submit" name="add" value="2" >Print</button>
+                        <button class="w3-button w3-left w3-margin-bottom w3-dark-grey" style="width:49%" type="submit" name="view" value="1" >View </button>
+                        <button class="w3-button w3-right w3-margin-bottom w3-dark-grey" style="width:49%" type="submit" name="print" value="1" >Print</button>
                     </form>
                 </div>
             </div>
         </div>
+        
         <div class="w3-row w3-margin">
             <h2>PURCHASE REPORT</h2>
+            
+            <!-- MODAL -->
+
+            <div id="alert" class="w3-modal w3-animate-opacity">
+                <div class="w3-modal-content w3-animate-zoom">
+                    <header class="w3-container w3-teal"> 
+                        <span onclick="document.getElementById('alert').style.display='none'" 
+                        class="w3-button w3-display-topright">&times;</span>
+                        <h2>Pop Up Blocked</h2>
+                    </header>
+                    <div class="w3-container w3-medium">
+                        <p>Enable Pop up to print this content </p>
+                        <p>Pop ups can be found on Right hand Corner of display </p>
+                    </div>
+                    <footer class="w3-container w3-teal">
+                        <p></p>
+                    </footer>
+                </div>
+            </div>
+        <!-- MODAL END-->
+
             <?php
             if(isset($_POST['qtr'])){
                 $grand=[0,0,0,0,0,0,0,0,0];
@@ -97,7 +135,7 @@
                 //$month_string=["April","May","June","July","August","September","October","November","December","January","February","March"];
                 for ($i=0;$i<count($month_variable);$i++) {
                     $monthly=[0,0,0,0,0,0,0,0,0];
-                    $stmt = $pdo->prepare('SELECT `purchase`.`supp_id`,`suppliers`.`supp_name`, `purchase`.`pur_date` as pdate, `purchase`.`pur_id`, `purchase`.`bill_no`, `purchase`.`total`, `purchase`.`tax5`, `purchase`.`gst5`, `purchase`.`tax12`, 
+                    $stmt = $pdo->prepare('SELECT `purchase`.`supp_id`,`suppliers`.`supp_name`,`suppliers`.`gstno`, `purchase`.`pur_date` as pdate, `purchase`.`pur_id`, `purchase`.`bill_no`, `purchase`.`total`, `purchase`.`tax5`, `purchase`.`gst5`, `purchase`.`tax12`, 
                     `purchase`.`gst12`, `purchase`.`tax18`,`purchase`.`gst18`, `purchase`.`tax28`, `purchase`.`gst28` , `payment_mode`.`pay_mode` , `purchase`.`pay_date` FROM `purchase` join `suppliers` on `purchase`.`supp_id` = `suppliers`.`supp_id` 
                     left JOIN payment_mode on payment_mode.pay_mode_id=purchase.pay_mode_id WHERE Month(`purchase`.`pur_date`)=:mont and `purchase`.`pur_date` BETWEEN :startdate and :enddate ORDER BY `purchase`.`pur_date` ASC');
                     $stmt->execute(array(':mont'=>$month_variable[$i], ':startdate'=>date($startdate), ':enddate'=>date($enddate)));
@@ -106,14 +144,14 @@
                     } else {
                         echo('<h3>'.$month_string[$i].' ('.$_GET["FY"].')'.'</h3>');
                         echo('<div class="w3-responsive"><table class="w3-table-all w3-small w3-centered sk-table">');
-                        echo('<tr><th>Supplier Name</th><th>Date</th><th>Bill No.</th><th>Total</th><th>TAXABLE</th><th>sgst-2.5%</th><th>cgst-2.5%</th><th>TAXABLE</th><th>sgst-6%</th><th>cgst-6%</th><th>TAXABLE</th><th>sgst-9%</th><th>cgst-9%</th><th>TAXABLE</th><th>sgst-14%</th><th>cgst-14%</th><th>Payment Mode</th><th>date</th></tr>');
+                        echo('<tr><th>Supplier Name</th><th>Date</th><th>Gst No.</th><th>Bill No.</th><th>Total</th><th>TAXABLE</th><th>sgst-2.5%</th><th>cgst-2.5%</th><th>TAXABLE</th><th>sgst-6%</th><th>cgst-6%</th><th>TAXABLE</th><th>sgst-9%</th><th>cgst-9%</th><th>TAXABLE</th><th>sgst-14%</th><th>cgst-14%</th><th>Payment Mode</th><th>date</th></tr>');
                         foreach($row as $r) {
                             if ($r["pay_date"]==NULL){
                                 $billpay_date='';
                             } else {
                                 $billpay_date=date("d-m-Y", strtotime($r["pay_date"]));
                             }
-                            echo('<tr><td><a href="../supplier/about.php?supp_id='.$r["supp_id"].'">'.$r["supp_name"].'</a></td><td>'.date("d-m-Y", strtotime($r["pdate"])).'</td><td><b><a href="../purchase/about.php?pur_id='.$r["pur_id"].'">'.$r["bill_no"].'</a></b></td><td><b>'.$r["total"].'</b></td><td>'.$r["tax5"].'</td><td>'.$r["gst5"].'</td><td>'.$r["gst5"].'</td>
+                            echo('<tr><td><a href="../supplier/about.php?supp_id='.$r["supp_id"].'">'.$r["supp_name"].'</a></td><td>'.date("d-m-Y", strtotime($r["pdate"])).'</td><td>'.$r["gstno"].'</td><td><b><a href="../purchase/about.php?pur_id='.$r["pur_id"].'">'.$r["bill_no"].'</a></b></td><td><b>'.$r["total"].'</b></td><td>'.$r["tax5"].'</td><td>'.$r["gst5"].'</td><td>'.$r["gst5"].'</td>
                             <td>'.$r["tax12"].'</td><td>'.$r["gst12"].'</td><td>'.$r["gst12"].'</td><td>'.$r["tax18"].'</td><td>'.$r["gst18"].'</td><td>'.$r["gst18"].'</td><td>'.$r["tax28"].'</td><td>'.$r["gst28"].'</td><td>'.$r["gst28"].'</td><td>'.$r["pay_mode"].'</td><td>'.$billpay_date.'</td></tr>');
                             
                             $monthly[0]=$r["total"]+$monthly[0];
@@ -137,7 +175,7 @@
                         $quaterly[7]=$monthly[7]+$quaterly[7];
                         $quaterly[8]=$monthly[8]+$quaterly[8];
 
-                        echo('<tr class="w3-yellow"><th colspan="3">TOTAL</th><th>'.$monthly[0].'</th><th>'.$monthly[1].'</th><th>'.$monthly[2].'</th><th>'.$monthly[2].'</th><th>'.$monthly[3].'</th><th>'.$monthly[4].'</th>
+                        echo('<tr class="w3-yellow"><th colspan="4">TOTAL</th><th>'.$monthly[0].'</th><th>'.$monthly[1].'</th><th>'.$monthly[2].'</th><th>'.$monthly[2].'</th><th>'.$monthly[3].'</th><th>'.$monthly[4].'</th>
                         <th>'.$monthly[4].'</th><th>'.$monthly[5].'</th><th>'.$monthly[6].'</th><th>'.$monthly[6].'</th><th>'.$monthly[7].'</th><th>'.$monthly[8].'</th><th>'.$monthly[8].'</th><th></th><th></th></tr>');
                         echo('</table></div>');
                         if ($month_variable[$i]%3==0){
@@ -185,7 +223,7 @@
             <?php
                 if(isset($_POST['qtr'])){
                     echo('<div class="w3-responsive"><table class="w3-table-all w3-small w3-centered sk-table">
-                    <tr><th>Month</th><th>Total Sales</th></tr>');
+                    <tr><th class="w3-center w3-medium">Month</th><th class="w3-center w3-medium">Total Sales</th></tr>');
                     $temp=0;
                     for ($i=0;$i<count($month_variable);$i++) {
                         $stmt = $pdo->prepare('SELECT sum(`total`) FROM `sales` WHERE Month(`sale_date`)=:mont and `sale_date` BETWEEN :startdate and :enddate GROUP by Month(`sale_date`)');
@@ -204,5 +242,22 @@
         <?php
             require_once "..//util/footer.php";
         ?>
+        <script>
+            $(document).ready(function () {
+            window.console && console.log('Document ready called');
+            <?php
+                if(isset($_SESSION['print'])) {
+                    $param='?qtr='.$_SESSION['qtr'].'&fy='.$_SESSION['repfy'];
+                    echo('var child = window.open(\' ./print.php'.$param.' \', \' _blank \');');
+                    unset($_SESSION['print']);
+                    unset($_SESSION['qtr']);
+                    unset($_SESSION['repfy']);
+                    echo('if (!child || child.closed) {
+                        $("#alert").css("display", "block");
+                    }');
+                }
+            ?>
+            });
+        </script>
     </body>
 </html>

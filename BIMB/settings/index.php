@@ -28,7 +28,7 @@
         <title>Settings</title>
     </head>
     <body class="w3-content" style="max-width:1350px">
-        <?php mainbody(-1,"Settings"); 
+        <?php mainbody(7,"Settings"); 
         flashMessage();?>
         <!-- items grid -->
 
