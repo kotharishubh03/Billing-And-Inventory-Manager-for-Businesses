@@ -3,7 +3,7 @@
 import mysql.connector
 qq=0
 while qq==0:
-    inpn=input("")
+    inpn=input("enter array")
     inpn=inpn.split("\t")
     print(inpn)
     print()

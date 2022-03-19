@@ -12,7 +12,7 @@
         $_GET["FY"]=$FY;
     }
 
-
+    echo('<script src="../util/chart-3.7.1/chart.js"></script>');
     require_once "..//util/header.php";
 ?>
         <title>Sales</title>
@@ -47,7 +47,7 @@
                 $month_string=["April","May","June","July","August","September","October","November","December","January","February","March"];
                 echo('<div class="w3-bar w3-black sk-border-except-bottom">');
                 for ($i=0;$i<12;$i++){
-                    echo('<button class="w3-bar-item w3-button tablink" onclick="openCity(event,\''.$month_string[$i].'\')">'.$month_string[$i].'</button>');
+                    echo('<button class="w3-bar-item w3-button tablink" onclick="openMonth(event,\''.$month_string[$i].'\')">'.$month_string[$i].'</button>');
                 }
                 echo('</div>');
             
@@ -65,6 +65,51 @@
                             <p>You Dont have any record For this Financial Year.</p>
                           </div>');
                         } else {
+                            $stmt = $pdo->prepare('SELECT `sale_date` as day, sum(`total`) as total FROM `sales` WHERE Month(`sale_date`)=:mont and `sale_date` BETWEEN :startdate and :enddate  GROUP by sale_date ORDER BY `sale_date` ASC');
+                            $stmt->execute(array(':mont'=>$month_variable[$i], ':startdate'=>date($startdate), ':enddate'=>date($enddate)));
+                            $m = $stmt->fetchall();
+                            $label=[];
+                            $data=[];
+                            foreach($m as $r){
+                                array_push($label,$r['day']);
+                                array_push($data,$r['total']);
+                            }
+
+                            echo('<div class="w3-row"><div class="w3-threequarter">
+                                <div class="w3-card-4 w3-round-large" style="margin: 5px;">
+                                    <div class="w3-container w3-center">
+                                        <canvas id="myChart'.$month_variable[$i].'"></canvas>
+                                </div></div></div></div><br>');
+                            echo('<script>
+                            const myChart'.$month_variable[$i].' = new Chart(document.getElementById(\'myChart'.$month_variable[$i].'\'),
+                            {
+                                type: \'line\',
+                                data: {
+                                    labels: ["'.implode("\",\"",$label).'"],
+                                    datasets: [{
+                                        label: \'Sales\',
+                                        backgroundColor: \'rgb(0, 255, 0)\',
+                                        borderColor: \'rgb(0, 255, 0)\',
+                                        data: ['.implode(",",$data).'],
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    interaction: {
+                                        mode: \'index\',
+                                        intersect: false,
+                                    },
+                                    stacked: false,
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: \'Sales Data\'
+                                        }
+                                    },
+                                },
+                            });
+                            </script>');
+
                             echo('<div class="w3-responsive"><table class="w3-table-all w3-small w3-centered sk-table">');
                             echo('<tr> <th>Customer</th> <th>Bill No</th> <th>Sale Date</th> <th>Total</th> <th>Discount</th> <th>Payment Mode</th> <th>Payment Date</th></tr>');
                             foreach($row as $r) {
@@ -85,7 +130,7 @@
             require_once "..//util/footer.php";
         ?>
         <script>
-            function openCity(evt, cityName) {
+            function openMonth(evt, cityName) {
             var i, x, tablinks;
             x = document.getElementsByClassName("city");
             for (i = 0; i < x.length; i++) {
