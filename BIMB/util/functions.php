@@ -135,24 +135,130 @@ function DateOptionADD($adz,$prnt,$goto){
 }
 
 ////need to be updated 
-function updatefydata($adz,$pdo){
-    $adz1=$adz-1;
-    $prdarr=[];
-    $stmt = $pdo->prepare('SELECT `prd_id`, SUM(`qnt`) as sm FROM `purchase_product` join purchase on purchase.pur_id=purchase_product.pur_id WHERE purchase.pur_date BETWEEN :startdate and :enddate GROUP By purchase_product.prd_id');
-    $stmt->execute(array(':startdate'=>date($adz1.'-04-01'), ':enddate'=>date($adz.'-03-31')));
-    $row = $stmt->fetchall();
-    foreach ($row as $r) {
-        $prdarr[$r["prd_id"]]["bought"]=$r["sm"];
-    }
+function updatefydata($pdo){
 
-    $stmt = $pdo->prepare('SELECT count(0) as prd_id,COUNT(0) as s');
+    $stmt = $pdo->prepare('SELECT `fy_id`, `start_date`, `end_date` FROM `financialyear`');
     $stmt->execute(array());
-    $row = $stmt->fetchall();
-    foreach ($row as $r) {
-        $prdarr[$r["prd_id"]]["sold"]=$r["s"];
+    $fydata = $stmt->fetchall();
+    $count = $stmt->rowCount();
+
+
+    for($i=0;$i<$count-1;$i++) {
+        $fy=$fydata[$i];
+
+        //////UPDATE PRODUCTS PREBAL
+        $prdarr=[];
+        
+        $stmt = $pdo->prepare('SELECT `prd_id` FROM `products`');
+        $stmt->execute(array());
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $prdarr[$r["prd_id"]]["bought"]=0;
+            $prdarr[$r["prd_id"]]["sold"]=0;
+            $prdarr[$r["prd_id"]]["subtraction"]=0;
+            $prdarr[$r["prd_id"]]["prebal"]=0;
+            $prdarr[$r["prd_id"]]["prd_id"]=$r["prd_id"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `prd_id`, SUM(`qnt`) as sm FROM `purchase_product` join purchase on purchase.pur_id=purchase_product.pur_id WHERE purchase.pur_date BETWEEN :startdate and :enddate GROUP By purchase_product.prd_id');
+        $stmt->execute(array(':startdate'=>date($fy["start_date"]), ':enddate'=>date($fy["end_date"])));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $prdarr[$r["prd_id"]]["bought"]=$r["sm"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `prd_id`, SUM(`qnt`) as sm FROM `sales_product` join sales on sales.sale_id=sales_product.sale_id WHERE sales.sale_date BETWEEN :startdate and :enddate GROUP By sales_product.prd_id');
+        $stmt->execute(array(':startdate'=>date($fy["start_date"]), ':enddate'=>date($fy["end_date"])));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $prdarr[$r["prd_id"]]["sold"]=$r["sm"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `prd_id`, `qnt` FROM `pre_bal_product` WHERE `fy_id`=:fy_id');
+        $stmt->execute(array(':fy_id'=>$fy["fy_id"]+1));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $prdarr[$r["prd_id"]]["subtraction"]=$r["qnt"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `prd_id`, `qnt` FROM `pre_bal_product` WHERE `fy_id`=:fy_id');
+        $stmt->execute(array(':fy_id'=>$fy["fy_id"]));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $prdarr[$r["prd_id"]]["prebal"]=$r["qnt"];
+        }
+        
+        foreach($prdarr as $r){
+            if ($r["subtraction"]!=$r["prebal"]+$r["bought"]-$r["sold"]){
+                if ($r["subtraction"]==0) {
+                    $s=$r["prebal"]+$r["bought"]-$r["sold"];
+                    $stmt = $pdo->prepare('INSERT INTO `pre_bal_product`(`prd_id`, `fy_id`, `qnt`) VALUES (:prd_id,:fy_id,:qnt)');
+                    $stmt->execute(array(':prd_id'=>$r["prd_id"],':fy_id'=>$fy['fy_id']+1,':qnt'=>$s));
+                } else {
+                    $s=$r["prebal"]+$r["bought"]-$r["sold"];
+                    $stmt = $pdo->prepare('UPDATE `pre_bal_product` SET `qnt`=:qnt WHERE `prd_id`=:prd_id and `fy_id`=:fy_id');
+                    $stmt->execute(array(':prd_id'=>$r["prd_id"],':fy_id'=>$fy['fy_id']+1,':qnt'=>$s));
+                }
+            }
+        }
+
+        //////UPDATE Suppliers PREBAL
+        $supparr=[];
+        
+        $stmt = $pdo->prepare('SELECT `supp_id` FROM `suppliers`');
+        $stmt->execute(array());
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $supparr[$r["supp_id"]]["pur"]=0;
+            $supparr[$r["supp_id"]]["pay"]=0;
+            $supparr[$r["supp_id"]]["subtraction"]=0;
+            $supparr[$r["supp_id"]]["prebal"]=0;
+            $supparr[$r["supp_id"]]["supp_id"]=$r["supp_id"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `supp_id`, SUM(`total`) as sm FROM `purchase` WHERE `pur_date` BETWEEN :startdate and :enddate GROUP By supp_id');
+        $stmt->execute(array(':startdate'=>date($fy["start_date"]), ':enddate'=>date($fy["end_date"])));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $supparr[$r["supp_id"]]["pur"]=$r["sm"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `supp_id`, SUM(`amount`)as sm FROM `suppliers_payment` WHERE `date` BETWEEN :startdate and :enddate GROUP By supp_id');
+        $stmt->execute(array(':startdate'=>date($fy["start_date"]), ':enddate'=>date($fy["end_date"])));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $supparr[$r["supp_id"]]["pay"]=$r["sm"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `supp_id`, `amt` FROM `supp_pre_bal` WHERE `fy_id`=:fy_id');
+        $stmt->execute(array(':fy_id'=>$fy["fy_id"]+1));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $supparr[$r["supp_id"]]["subtraction"]=$r["amt"];
+        }
+
+        $stmt = $pdo->prepare('SELECT `supp_id`, `amt` FROM `supp_pre_bal` WHERE `fy_id`=:fy_id');
+        $stmt->execute(array(':fy_id'=>$fy["fy_id"]));
+        $row = $stmt->fetchall();
+        foreach ($row as $r) {
+            $supparr[$r["supp_id"]]["prebal"]=$r["amt"];
+        }
+
+        foreach($supparr as $r){
+            if ($r["subtraction"]!=$r["prebal"]+$r["pur"]-$r["pay"]){
+                if ($r["subtraction"]==0) {
+                    $s=$r["prebal"]+$r["pur"]-$r["pay"];
+                    $stmt = $pdo->prepare('INSERT INTO `supp_pre_bal`(`supp_id`, `fy_id`, `amt`) VALUES (:supp_id,:fy_id,:amt)');
+                    $stmt->execute(array(':supp_id'=>$r["supp_id"],':fy_id'=>$fy['fy_id']+1,':amt'=>$s));
+                } else {
+                    $s=$r["prebal"]+$r["pur"]-$r["pay"];
+                    $stmt = $pdo->prepare('UPDATE `supp_pre_bal` SET `amt`=:amt WHERE `supp_id`=:supp_id and `fy_id`=:fy_id');
+                    $stmt->execute(array(':supp_id'=>$r["supp_id"],':fy_id'=>$fy['fy_id']+1,':amt'=>$s));
+                }
+            }
+        }
     }
-
+    
 }
-
 session_start();
 ?>

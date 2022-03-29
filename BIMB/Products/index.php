@@ -13,6 +13,8 @@
         $_GET["FY"]=$FY;
     }
 
+    updatefydata($pdo);
+
     $prdarr=[];  
     $stmt = $pdo->prepare('SELECT `products`.`prd_id`, `prd_name` FROM `products` join `products_supplier` on `products`.`prd_id`= `products_supplier`.`prd_id` ORDER BY `products`.`prd_id` ASC');
     $stmt->execute(array());
