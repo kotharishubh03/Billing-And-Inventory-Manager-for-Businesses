@@ -3,40 +3,22 @@
     require_once "..//util/functions.php";
 
     if(isset($_POST['print'])){
-        if(!isset($_POST['fy'])){
+        if(!isset($_GET['fy'])){
             $TodayYear = idate("Y");
             $TodayMonth = idate("m");
             if($TodayMonth<4){
                 $repfy=$TodayYear-1;
-            }     
+            }
+            else{
+                $repfy=$TodayYear;
+            }
         }
         else{
-            $repfy=$_POST['fy'];
+            $repfy=$_GET['fy'];
         }
         $_SESSION['print']=1;
         $_SESSION['qtr']=$_POST['qtr'];
         $_SESSION['repfy']=$repfy;
-    }
-
-    if(isset($_POST['shop_info'])){
-    
-        $stmt = $pdo->prepare('SELECT `s_key` FROM `shop_info`');
-        $stmt->execute(array());
-        $s_key = $stmt->fetchall();
-        foreach($s_key as $key){
-            $stmt = $pdo->prepare('UPDATE `shop_info` SET `value`=:val WHERE `s_key`=:s_key');
-            $stmt->execute(array(':val'=>$_POST[$key['s_key']],':s_key'=>$key['s_key']));
-        }
-        $_SESSION['success']="Successfully Saved ";
-        header("Location: ./index.php");
-        return;
-    }
-    $stmt = $pdo->prepare('SELECT * FROM `shop_info`');
-    $stmt->execute(array());
-    $temp = $stmt->fetchall();
-    $shopinfo=array();
-    foreach($temp as $tem){
-        $shopinfo[$tem['s_key']]=$tem['value'];
     }
 
     require_once "..//util/header.php";

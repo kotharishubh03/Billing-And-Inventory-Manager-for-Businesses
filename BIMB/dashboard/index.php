@@ -20,10 +20,12 @@ use function PHPSTORM_META\type;
         $stmt = $pdo->prepare('SELECT sum(`total`) FROM `purchase` WHERE Month(`pur_date`)=:mont and `pur_date` BETWEEN :startdate and :enddate GROUP by Month(`pur_date`)');
         $stmt->execute(array(':mont'=>$i, ':startdate'=>date($startdate), ':enddate'=>date($enddate)));
         $row = $stmt->fetch();
-        if($row['sum(`total`)']){
-        $pur_record=$pur_record.$row['sum(`total`)'].",";
-        } else{
-            $pur_record=$pur_record.'0'.",";
+        if($row){
+            if($row['sum(`total`)']){
+            $pur_record=$pur_record.$row['sum(`total`)'].",";
+            } else{
+                $pur_record=$pur_record.'0'.",";
+            }
         }
     }
     $pur_record=$pur_record."]";
@@ -33,10 +35,12 @@ use function PHPSTORM_META\type;
         $stmt = $pdo->prepare('SELECT sum(`total`) FROM `sales` WHERE Month(`sale_date`)=:mont and `sale_date` BETWEEN :startdate and :enddate GROUP by Month(`sale_date`)');
         $stmt->execute(array(':mont'=>$i, ':startdate'=>date($startdate), ':enddate'=>date($enddate)));
         $row = $stmt->fetch();
-        if($row['sum(`total`)']){
-        $sales_record=$sales_record.$row['sum(`total`)'].",";
-        } else{
-            $sales_record=$sales_record.'0'.",";
+        if($row){
+            if($row['sum(`total`)']){
+            $sales_record=$sales_record.$row['sum(`total`)'].",";
+            } else{
+                $sales_record=$sales_record.'0'.",";
+            }
         }
     }
     $sales_record=$sales_record."]";

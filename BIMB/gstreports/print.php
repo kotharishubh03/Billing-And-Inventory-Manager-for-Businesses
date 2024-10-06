@@ -127,22 +127,23 @@ require_once "..//util/header.php";
 
                     if ($month_variable[$i]%3==0){
                         echo('<tr><th colspan="4"></th><th>Total</th><th>TAXABLE</th><th>sgst-2.5%</th><th>cgst-2.5%</th><th>TAXABLE</th><th>sgst-6%</th><th>cgst-6%</th><th>TAXABLE</th><th>sgst-9%</th><th>cgst-9%</th><th>TAXABLE</th><th>sgst-14%</th><th>cgst-14%</th><th colspan="2"></th></tr>');
-                        echo('<tr class="w3-yellow"><th colspan="4">QTR-'.((int) ($month_variable[$i]/3)-1).' TOTAL</th><th>'.$quaterly[0].'</th><th>'.$quaterly[1].'</th><th>'.$quaterly[2].'</th><th>'.$quaterly[2].'</th><th>'.$quaterly[3].'</th><th>'.$quaterly[4].'</th>
+                        echo('<tr class="w3-yellow"><th colspan="4">'.$qtr.' TOTAL</th><th>'.$quaterly[0].'</th><th>'.$quaterly[1].'</th><th>'.$quaterly[2].'</th><th>'.$quaterly[2].'</th><th>'.$quaterly[3].'</th><th>'.$quaterly[4].'</th>
                             <th>'.$quaterly[4].'</th><th>'.$quaterly[5].'</th><th>'.$quaterly[6].'</th><th>'.$quaterly[6].'</th><th>'.$quaterly[7].'</th><th>'.$quaterly[8].'</th><th>'.$quaterly[8].'</th><th colspan="2"></th></tr>');
                         echo('<tr><td colspan="19" class="sk-no-border"></td></tr>');
+                    
+
+                        $grand[0]=$quaterly[0]+$grand[0];
+                        $grand[1]=$quaterly[1]+$grand[1];
+                        $grand[2]=$quaterly[2]+$grand[2];
+                        $grand[3]=$quaterly[3]+$grand[3];
+                        $grand[4]=$quaterly[4]+$grand[4];
+                        $grand[5]=$quaterly[5]+$grand[5];
+                        $grand[6]=$quaterly[6]+$grand[6];
+                        $grand[7]=$quaterly[7]+$grand[7];
+                        $grand[8]=$quaterly[8]+$grand[8];
+
+                        $quaterly=[0,0,0,0,0,0,0,0,0];
                     }
-
-                    $grand[0]=$quaterly[0]+$grand[0];
-                    $grand[1]=$quaterly[1]+$grand[1];
-                    $grand[2]=$quaterly[2]+$grand[2];
-                    $grand[3]=$quaterly[3]+$grand[3];
-                    $grand[4]=$quaterly[4]+$grand[4];
-                    $grand[5]=$quaterly[5]+$grand[5];
-                    $grand[6]=$quaterly[6]+$grand[6];
-                    $grand[7]=$quaterly[7]+$grand[7];
-                    $grand[8]=$quaterly[8]+$grand[8];
-
-                    $quaterly=[0,0,0,0,0,0,0,0,0];
                 }
             }
             if ($grand[0]!=0){
